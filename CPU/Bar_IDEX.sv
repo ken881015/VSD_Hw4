@@ -19,7 +19,7 @@ module Bar_IDEX(
     input BrUn_in,          output logic BrUn_out,
     input LUI_in,           output logic  LUI_out,
     input DMOn_in,          output logic DMOn_out,
-    input[1:0] CSRAddr_in,  output logic [1:0] CSRAddr_out,
+    input[11:0] CSRAddr_in,  output logic [11:0] CSRAddr_out,
     
     // add for axi signal modification
     input DMstall_axi,

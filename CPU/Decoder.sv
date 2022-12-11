@@ -10,7 +10,7 @@ module Decoder (
     output logic [4:0] rda,    
     output logic [6:0] opcode,
     output logic [24:0] imm_material,
-    output logic [1:0] CSRAddr
+    output logic [11:0] CSRAddr
 );
 
 // assign funct7       = inst[31:25];
@@ -21,6 +21,6 @@ assign funct3       = inst[14:12];
 assign rda          = inst[11:7];
 assign opcode       = inst[6:0];
 assign imm_material = inst[31:7];
-assign CSRAddr      = {inst[27],inst[21]};
+assign CSRAddr      = inst[31:20];
     
 endmodule

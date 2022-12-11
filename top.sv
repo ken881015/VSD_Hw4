@@ -14,6 +14,15 @@
 module top(
     input clk,
     input rst,
+
+	// Clock and Rst for Watch Dog Timer
+	input clk2,
+	input rst2,
+
+	// Connect with Sensor
+	input sensor_ready,
+	input [31:0] sensor_out,
+	output sensor_en,
 	
 	// Connect with ROM
 	input[31:0] ROM_out,
@@ -125,25 +134,25 @@ module top(
 	logic                      BVALID_S2;
 	logic                      BREADY_S2;
 
-	// //WRITE ADDRESS3
-	// logic [`AXI_IDS_BITS-1:0]  AWID_S3;
-	// logic [`AXI_ADDR_BITS-1:0] AWADDR_S3;
-	// logic [`AXI_LEN_BITS-1:0]  AWLEN_S3;
-	// logic [`AXI_SIZE_BITS-1:0] AWSIZE_S3;
-	// logic [1:0]                AWBURST_S3;
-	// logic                      AWVALID_S3;
-	// logic                      AWREADY_S3;
-	// //WRITE DATA3
-	// logic [`AXI_DATA_BITS-1:0] WDATA_S3;
-	// logic [`AXI_STRB_BITS-1:0] WSTRB_S3;
-	// logic                      WLAST_S3;
-	// logic                      WVALID_S3;
-	// logic                      WREADY_S3;
-	// //WRITE RESPONSE3
-	// logic [`AXI_IDS_BITS-1:0]  BID_S3;
-	// logic [1:0]                BRESP_S3;
-	// logic                      BVALID_S3;
-	// logic                      BREADY_S3;
+	//WRITE ADDRESS3
+	logic [`AXI_IDS_BITS-1:0]  AWID_S3;
+	logic [`AXI_ADDR_BITS-1:0] AWADDR_S3;
+	logic [`AXI_LEN_BITS-1:0]  AWLEN_S3;
+	logic [`AXI_SIZE_BITS-1:0] AWSIZE_S3;
+	logic [1:0]                AWBURST_S3;
+	logic                      AWVALID_S3;
+	logic                      AWREADY_S3;
+	//WRITE DATA3
+	logic [`AXI_DATA_BITS-1:0] WDATA_S3;
+	logic [`AXI_STRB_BITS-1:0] WSTRB_S3;
+	logic                      WLAST_S3;
+	logic                      WVALID_S3;
+	logic                      WREADY_S3;
+	//WRITE RESPONSE3
+	logic [`AXI_IDS_BITS-1:0]  BID_S3;
+	logic [1:0]                BRESP_S3;
+	logic                      BVALID_S3;
+	logic                      BREADY_S3;
 
 	//WRITE ADDRESS4
 	logic [`AXI_IDS_BITS-1:0]  AWID_S4;
@@ -153,17 +162,37 @@ module top(
 	logic [1:0]                AWBURST_S4;
 	logic                      AWVALID_S4;
 	logic                      AWREADY_S4;
-	//WRITE DATA4
+	//WRITE DATA3
 	logic [`AXI_DATA_BITS-1:0] WDATA_S4;
 	logic [`AXI_STRB_BITS-1:0] WSTRB_S4;
 	logic                      WLAST_S4;
 	logic                      WVALID_S4;
 	logic                      WREADY_S4;
-	//WRITE RESPONSE4
+	//WRITE RESPONSE3
 	logic [`AXI_IDS_BITS-1:0]  BID_S4;
 	logic [1:0]                BRESP_S4;
 	logic                      BVALID_S4;
 	logic                      BREADY_S4;
+
+	//WRITE ADDRESS5
+	logic [`AXI_IDS_BITS-1:0]  AWID_S5;
+	logic [`AXI_ADDR_BITS-1:0] AWADDR_S5;
+	logic [`AXI_LEN_BITS-1:0]  AWLEN_S5;
+	logic [`AXI_SIZE_BITS-1:0] AWSIZE_S5;
+	logic [1:0]                AWBURST_S5;
+	logic                      AWVALID_S5;
+	logic                      AWREADY_S5;
+	//WRITE DATA5
+	logic [`AXI_DATA_BITS-1:0] WDATA_S5;
+	logic [`AXI_STRB_BITS-1:0] WSTRB_S5;
+	logic                      WLAST_S5;
+	logic                      WVALID_S5;
+	logic                      WREADY_S5;
+	//WRITE RESPONSE5
+	logic [`AXI_IDS_BITS-1:0]  BID_S5;
+	logic [1:0]                BRESP_S5;
+	logic                      BVALID_S5;
+	logic                      BREADY_S5;
 	
 	//READ ADDRESS0
 	logic [`AXI_IDS_BITS-1:0]  ARID_S0;
@@ -196,6 +225,7 @@ module top(
 	logic                      RLAST_S1;
 	logic                      RVALID_S1;
 	logic                      RREADY_S1;
+	
 	//READ ADDRESS2
 	logic [`AXI_IDS_BITS-1:0]  ARID_S2;
 	logic [`AXI_ADDR_BITS-1:0] ARADDR_S2;
@@ -212,21 +242,21 @@ module top(
 	logic                      RVALID_S2;
 	logic                      RREADY_S2;
 
-	// //READ ADDRESS3
-	// logic [`AXI_IDS_BITS-1:0]  ARID_S3;
-	// logic [`AXI_ADDR_BITS-1:0] ARADDR_S3;
-	// logic [`AXI_LEN_BITS-1:0]  ARLEN_S3;
-	// logic [`AXI_SIZE_BITS-1:0] ARSIZE_S3;
-	// logic [1:0]                ARBURST_S3;
-	// logic                      ARVALID_S3;
-	// logic                      ARREADY_S3;
-	// //READ DATA3
-	// logic [`AXI_IDS_BITS-1:0]  RID_S3;
-	// logic [`AXI_DATA_BITS-1:0] RDATA_S3;
-	// logic [1:0]                RRESP_S3;
-	// logic                      RLAST_S3;
-	// logic                      RVALID_S3;
-	// logic                      RREADY_S3;
+	//READ ADDRESS3
+	logic [`AXI_IDS_BITS-1:0]  ARID_S3;
+	logic [`AXI_ADDR_BITS-1:0] ARADDR_S3;
+	logic [`AXI_LEN_BITS-1:0]  ARLEN_S3;
+	logic [`AXI_SIZE_BITS-1:0] ARSIZE_S3;
+	logic [1:0]                ARBURST_S3;
+	logic                      ARVALID_S3;
+	logic                      ARREADY_S3;
+	//READ DATA3
+	logic [`AXI_IDS_BITS-1:0]  RID_S3;
+	logic [`AXI_DATA_BITS-1:0] RDATA_S3;
+	logic [1:0]                RRESP_S3;
+	logic                      RLAST_S3;
+	logic                      RVALID_S3;
+	logic                      RREADY_S3;
 
 	//READ ADDRESS4
 	logic [`AXI_IDS_BITS-1:0]  ARID_S4;
@@ -236,7 +266,7 @@ module top(
 	logic [1:0]                ARBURST_S4;
 	logic                      ARVALID_S4;
 	logic                      ARREADY_S4;
-	//READ DATA4
+	//READ DATA3
 	logic [`AXI_IDS_BITS-1:0]  RID_S4;
 	logic [`AXI_DATA_BITS-1:0] RDATA_S4;
 	logic [1:0]                RRESP_S4;
@@ -244,6 +274,23 @@ module top(
 	logic                      RVALID_S4;
 	logic                      RREADY_S4;
 
+	//READ ADDRESS5
+	logic [`AXI_IDS_BITS-1:0]  ARID_S5;
+	logic [`AXI_ADDR_BITS-1:0] ARADDR_S5;
+	logic [`AXI_LEN_BITS-1:0]  ARLEN_S5;
+	logic [`AXI_SIZE_BITS-1:0] ARSIZE_S5;
+	logic [1:0]                ARBURST_S5;
+	logic                      ARVALID_S5;
+	logic                      ARREADY_S5;
+	//READ DATA4
+	logic [`AXI_IDS_BITS-1:0]  RID_S5;
+	logic [`AXI_DATA_BITS-1:0] RDATA_S5;
+	logic [1:0]                RRESP_S5;
+	logic                      RLAST_S5;
+	logic                      RVALID_S5;
+	logic                      RREADY_S5;
+
+	// Master 0 & 1
 	CPU_wrapper m_cpu_wrapper(
     	.ACLK(clk),
     	.ARESETn(~rst),
@@ -305,6 +352,7 @@ module top(
 		.BREADY_M1(BREADY_M1)
 	);
 
+	// Bridge
 	AXI m_axi(
 		.ACLK(clk),
 		.ARESETn(~rst),
@@ -409,27 +457,27 @@ module top(
 		.BVALID_S2(BVALID_S2),
 		.BREADY_S2(BREADY_S2),
 
-		// //WRITE ADDRESS3
-		// .AWID_S3(AWID_S3),
-		// .AWADDR_S3(AWADDR_S3),
-		// .AWLEN_S3(AWLEN_S3),
-		// .AWSIZE_S3(AWSIZE_S3),
-		// .AWBURST_S3(AWBURST_S3),
-		// .AWVALID_S3(AWVALID_S3),
-		// .AWREADY_S3(AWREADY_S3),
+		//WRITE ADDRESS3
+		.AWID_S3(AWID_S3),
+		.AWADDR_S3(AWADDR_S3),
+		.AWLEN_S3(AWLEN_S3),
+		.AWSIZE_S3(AWSIZE_S3),
+		.AWBURST_S3(AWBURST_S3),
+		.AWVALID_S3(AWVALID_S3),
+		.AWREADY_S3(AWREADY_S3),
 
-		// //WRITE DATA3
-		// .WDATA_S3(WDATA_S3),
-		// .WSTRB_S3(WSTRB_S3),
-		// .WLAST_S3(WLAST_S3),
-		// .WVALID_S3(WVALID_S3),
-		// .WREADY_S3(WREADY_S3),
+		//WRITE DATA3
+		.WDATA_S3(WDATA_S3),
+		.WSTRB_S3(WSTRB_S3),
+		.WLAST_S3(WLAST_S3),
+		.WVALID_S3(WVALID_S3),
+		.WREADY_S3(WREADY_S3),
 
-		// //WRITE RESPONSE3
-		// .BID_S3(BID_S3),
-		// .BRESP_S3(BRESP_S3),
-		// .BVALID_S3(BVALID_S3),
-		// .BREADY_S3(BREADY_S3),
+		//WRITE RESPONSE3
+		.BID_S3(BID_S3),
+		.BRESP_S3(BRESP_S3),
+		.BVALID_S3(BVALID_S3),
+		.BREADY_S3(BREADY_S3),
 
 		//WRITE ADDRESS4
 		.AWID_S4(AWID_S4),
@@ -452,6 +500,28 @@ module top(
 		.BRESP_S4(BRESP_S4),
 		.BVALID_S4(BVALID_S4),
 		.BREADY_S4(BREADY_S4),
+
+		//WRITE ADDRESS5
+		.AWID_S5(AWID_S5),
+		.AWADDR_S5(AWADDR_S5),
+		.AWLEN_S5(AWLEN_S5),
+		.AWSIZE_S5(AWSIZE_S5),
+		.AWBURST_S5(AWBURST_S5),
+		.AWVALID_S5(AWVALID_S5),
+		.AWREADY_S5(AWREADY_S5),
+
+		//WRITE DATA4
+		.WDATA_S5(WDATA_S5),
+		.WSTRB_S5(WSTRB_S5),
+		.WLAST_S5(WLAST_S5),
+		.WVALID_S5(WVALID_S5),
+		.WREADY_S5(WREADY_S5),
+
+		//WRITE RESPONSE4
+		.BID_S5(BID_S5),
+		.BRESP_S5(BRESP_S5),
+		.BVALID_S5(BVALID_S5),
+		.BREADY_S5(BREADY_S5),
 
 		//READ ADDRESS0
 		.ARID_S0(ARID_S0),
@@ -504,22 +574,22 @@ module top(
 		.RVALID_S2(RVALID_S2),
 		.RREADY_S2(RREADY_S2),
 
-		// //READ ADDRESS3
-		// .ARID_S3(ARID_S3),
-		// .ARADDR_S3(ARADDR_S3),
-		// .ARLEN_S3(ARLEN_S3),
-		// .ARSIZE_S3(ARSIZE_S3),
-		// .ARBURST_S3(ARBURST_S3),
-		// .ARVALID_S3(ARVALID_S3),
-		// .ARREADY_S3(ARREADY_S3),
+		//READ ADDRESS3
+		.ARID_S3(ARID_S3),
+		.ARADDR_S3(ARADDR_S3),
+		.ARLEN_S3(ARLEN_S3),
+		.ARSIZE_S3(ARSIZE_S3),
+		.ARBURST_S3(ARBURST_S3),
+		.ARVALID_S3(ARVALID_S3),
+		.ARREADY_S3(ARREADY_S3),
 
-		// //READ DATA3
-		// .RID_S3(RID_S3),
-		// .RDATA_S3(RDATA_S3),
-		// .RRESP_S3(RRESP_S3),
-		// .RLAST_S3(RLAST_S3),
-		// .RVALID_S3(RVALID_S3),
-		// .RREADY_S3(RREADY_S3),
+		//READ DATA3
+		.RID_S3(RID_S3),
+		.RDATA_S3(RDATA_S3),
+		.RRESP_S3(RRESP_S3),
+		.RLAST_S3(RLAST_S3),
+		.RVALID_S3(RVALID_S3),
+		.RREADY_S3(RREADY_S3),
 
 		//READ ADDRESS4
 		.ARID_S4(ARID_S4),
@@ -536,9 +606,27 @@ module top(
 		.RRESP_S4(RRESP_S4),
 		.RLAST_S4(RLAST_S4),
 		.RVALID_S4(RVALID_S4),
-		.RREADY_S4(RREADY_S4)
+		.RREADY_S4(RREADY_S4),
+
+		//READ ADDRESS5
+		.ARID_S5(ARID_S5),
+		.ARADDR_S5(ARADDR_S5),
+		.ARLEN_S5(ARLEN_S5),
+		.ARSIZE_S5(ARSIZE_S5),
+		.ARBURST_S5(ARBURST_S5),
+		.ARVALID_S5(ARVALID_S5),
+		.ARREADY_S5(ARREADY_S5),
+
+		//READ DATA4
+		.RID_S5(RID_S5),
+		.RDATA_S5(RDATA_S5),
+		.RRESP_S5(RRESP_S5),
+		.RLAST_S5(RLAST_S5),
+		.RVALID_S5(RVALID_S5),
+		.RREADY_S5(RREADY_S5)
 	);
 
+	// slave 0
 	ROM_wrapper m_rom_wrapper(
 		.ACLK(clk),
 		.ARESETn(~rst),
@@ -566,6 +654,7 @@ module top(
 		.ROM_address(ROM_address)
 	);
 
+	// slave 1
 	SRAM_wrapper IM1(
 		.ACLK(clk),
 		.ARESETn(~rst),
@@ -600,6 +689,7 @@ module top(
 		.RREADY_S(RREADY_S1)
 	);
 	
+	// slave 2
 	SRAM_wrapper DM1(
 		.ACLK(clk),
 		.ARESETn(~rst),
@@ -634,43 +724,56 @@ module top(
 		.RREADY_S(RREADY_S2)
 	);
 
+	// slave 3
+	// sensor_ctrl sensor_ctrl(
+	// 	.clk(),
+	// 	.rst(),
+	// 	.sctrl_en(),
+	// 	.sctrl_clear(),
+	// 	.sctrl_addr(),
+	// 	.sens
+	// );
+
+	// slave 4
+
+	// slave 5
 	DRAM_wrapper DRAM_W1(
 		.ACLK(clk),
 		.ARESETn(~rst),
 
-		.AWID_S(AWID_S4),
-		.AWADDR_S(AWADDR_S4),
-		.AWLEN_S(AWLEN_S4),
-		.AWSIZE_S(AWSIZE_S4),
-		.AWBURST_S(AWBURST_S4),
-		.AWVALID_S(AWVALID_S4),
-		.AWREADY_S(AWREADY_S4),
+		.AWID_S(AWID_S5),
+		.AWADDR_S(AWADDR_S5),
+		.AWLEN_S(AWLEN_S5),
+		.AWSIZE_S(AWSIZE_S5),
+		.AWBURST_S(AWBURST_S5),
+		.AWVALID_S(AWVALID_S5),
+		.AWREADY_S(AWREADY_S5),
 
-		.WDATA_S(WDATA_S4),
-		.WSTRB_S(WSTRB_S4),
-		.WLAST_S(WLAST_S4),
-		.WVALID_S(WVALID_S4),
-		.WREADY_S(WREADY_S4),
+		.WDATA_S(WDATA_S5),
+		.WSTRB_S(WSTRB_S5),
+		.WLAST_S(WLAST_S5),
+		.WVALID_S(WVALID_S5),
+		.WREADY_S(WREADY_S5),
 
-		.BID_S(BID_S4),
-		.BRESP_S(BRESP_S4),
-		.BVALID_S(BVALID_S4),
-		.BREADY_S(BREADY_S4),
+		.BID_S(BID_S5),
+		.BRESP_S(BRESP_S5),
+		.BVALID_S(BVALID_S5),
+		.BREADY_S(BREADY_S5),
 
-		.ARID_S(ARID_S4),
-		.ARADDR_S(ARADDR_S4),
-		.ARLEN_S(ARLEN_S4),
-		.ARSIZE_S(ARSIZE_S4),
-		.ARBURST_S(ARBURST_S4),
-		.ARVALID_S(ARVALID_S4),
-		.ARREADY_S(ARREADY_S4),
+		.ARID_S(ARID_S5),
+		.ARADDR_S(ARADDR_S5),
+		.ARLEN_S(ARLEN_S5),
+		.ARSIZE_S(ARSIZE_S5),
+		.ARBURST_S(ARBURST_S5),
+		.ARVALID_S(ARVALID_S5),
+		.ARREADY_S(ARREADY_S5),
 
-		.RID_S(RID_S4),
-		.RDATA_S(RDATA_S4),
-		.RRESP_S(RRESP_S4),
-		.RLAST_S(RLAST_S4),
-		.RVALID_S(RVALID_S4),
-		.RREADY_S(RREADY_S4),
+		.RID_S(RID_S5),
+		.RDATA_S(RDATA_S5),
+		.RRESP_S(RRESP_S5),
+		.RLAST_S(RLAST_S5),
+		.RVALID_S(RVALID_S5),
+		.RREADY_S(RREADY_S5),
 
 		// ports toward DRAM
 		.DRAM_CSn(DRAM_CSn),
