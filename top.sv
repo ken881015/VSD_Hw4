@@ -735,6 +735,9 @@ module top(
 	// );
 
 	// slave 4
+	// WDT_wrapper WDT1(
+
+	// );
 
 	// slave 5
 	DRAM_wrapper DRAM_W1(

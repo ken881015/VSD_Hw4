@@ -8,33 +8,26 @@ module CSReg(
     input PCstall_axi
 );
 
-logic[63:0] clock;
-logic[63:0] Instret;
-
-// Size: 4096 * 64 bits
-logic[63:0] CSRegs[(1<<12)-1 :0];
+// Size: 4096 * 32 bits
+logic[31:0] CSRegs[(1<<12)-1 :0];
 
 always_ff @(posedge rst or posedge clk) begin
     if(rst) begin
-        clock <= 64'b0;
-        Instret <= 64'b0;
+        foreach(CSRegs[i])begin
+            CSRegs[i] <= 32'b0;
+        end
     end
     else begin
-        clock <= clock + 64'd1;
-        
-        if(!PCstall_axi && retire == 1'b1) begin
-            Instret <= Instret + 64'd1;
+        // clock
+        {CSRegs[12'hC80],CSRegs[12'hC00]} <= {CSRegs[12'hC80],CSRegs[12'hC00]} + 64'b1;
+
+        // Instret
+        if(retire == 1'b1) begin
+            {CSRegs[12'hC82],CSRegs[12'hC02]} <= {CSRegs[12'hC82],CSRegs[12'hC02]} + 64'd1;
         end
     end
 end
 
-always_comb begin 
-    case({addr[7],addr[1]})
-        2'b11: data = Instret[32+:32];
-        2'b01: data = Instret[0+:32];
-        2'b10: data = clock[32+:32];
-        2'b00: data = clock[0+:32];
-    endcase
-end
+assign data = CSRegs[addr];
 
 endmodule
