@@ -9,13 +9,10 @@ module CSRLU(
 );
 
 always_comb begin
-    case(funct3)
+    case(funct3[1:0])
         `RW  : CSRLUOut = rs1;
-        `RWI : CSRLUOut = rs1;
         `RS  : CSRLUOut = csr | rs1;
-        `RSI : CSRLUOut = csr | rs1;
         `RC  : CSRLUOut = csr & (~rs1);
-        `RCI : CSRLUOut = csr & (~rs1);
         default: CSRLUOut = 32'b0;
     endcase
 end

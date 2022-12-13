@@ -7,6 +7,7 @@
 `include "CPU/BranchComp.sv"
 `include "CPU/Bar_IDEX.sv"
 `include "CPU/ALU.sv"
+`include "CPU/CSRLU.sv"
 `include "CPU/Bar_EXME.sv"
 `include "CPU/Bar_MEWB.sv"
 `include "CPU/Forward.sv"
@@ -44,8 +45,7 @@ logic[31:0] r1d;
 logic[31:0] r2d;
 logic[31:0] fwd1;
 logic[31:0] fwd2;
-// logic [6:0] funct7;
-logic funct7_1bit;
+logic [6:0] funct7;
 logic [4:0] r2a;
 logic [4:0] r1a;
 logic [2:0] funct3;
@@ -65,9 +65,9 @@ logic [3:0] MemRW;
 logic [1:0] WBSel;
 logic LUI;
 logic DMOn;
+logic CSRWEn;
 logic retire;
-logic [11:0] CSRAddr;
-logic [31:0] CSRData;
+logic [31:0] CSR_rdata;
 logic [31:0] pc_idex_out;
 logic [4:0] r1a_idex_out;
 logic [4:0] r2a_idex_out;
@@ -86,10 +86,12 @@ logic [6:0] opcode_idex_out;
 logic BrUn_idex_out;
 logic LUI_idex_out;
 logic DMOn_idex_out;
-logic[11:0] CSRAddr_idex_out;
+logic CSRWEn_idex_out;
 logic[31:0] lui_out;
 logic[31:0] a_out;
 logic[31:0] b_out;
+logic[31:0] CSR_rs1;
+logic[31:0] CSRLUOut;
 logic[31:0] pc_exme_out;
 logic[4:0] rda_exme_out;
 logic[2:0] funct3_exme_out;
@@ -99,7 +101,7 @@ logic[3:0] MemRW_exme_out;
 logic DMOn_exme_out;
 logic[1:0] WBSel_exme_out;
 logic RegWEn_exme_out;
-logic[31:0] CSRData_exme_out;
+logic[31:0] CSR_rdata_exme_out;
 logic[31:0] pc_mewb_out;
 logic [4:0] rda_mewb_out;
 logic [31:0] ALUOut_mewb_out;
@@ -107,7 +109,7 @@ logic [31:0] DMRdata_mewb_out;
 logic [2:0] funct3_mewb_out;
 logic [1:0] WBSel_mewb_out;
 logic RegWEn_mewb_out;
-logic [31:0] CSRData_mewb_out;
+logic [31:0] CSR_rdata_mewb_out;
 logic [31:0] WBdata;
 logic [31:0] pc_added;
 logic DH_flush;
@@ -154,20 +156,17 @@ Bar_IFID m_bar_ifid(
 
 Decoder m_decoder(
     .inst(inst_ifid_out),
-    // .funct7(funct7),
-    .funct7_1bit(funct7_1bit),
+    .funct7(funct7),
     .r2a(r2a),
     .r1a(r1a),
     .funct3(funct3),
     .rda(rda),
     .opcode(opcode),
-    .imm_material(imm_material),
-    .CSRAddr(CSRAddr)
+    .imm_material(imm_material)
 );
 
 Controller m_controller(
-    // .funct7(funct7),
-    .funct7_1bit(funct7_1bit),
+    .funct7(funct7),
     .funct3(funct3),
     .opcode(opcode),
     .ImmSel(ImmSel),
@@ -179,28 +178,14 @@ Controller m_controller(
     .MemRW(MemRW),
     .WBSel(WBSel),
     .LUI(LUI),
-    .DMOn(DMOn)
+    .DMOn(DMOn),
+    .CSRWEn(CSRWEn)
 );
 
 ImmGen m_immgen(
     .ImmSel(ImmSel),
     .imm_material(imm_material),
     .imm(imm)
-);
-
-RegFile m_regfile(
-    .clk(clk),
-    .rst(rst),
-
-    //todo : put the signal 
-    .wen(RegWEn_mewb_out),
-    .wa(rda_mewb_out), 
-    .wd(WBdata),
-
-    .r1a(r1a_idex_out), .r1d(r1d),
-    .r2a(r2a_idex_out), .r2d(r2d),
-
-    .PCstall_axi(PCstall_axi)
 );
 
 Bar_IDEX m_bar_idex(
@@ -224,7 +209,7 @@ Bar_IDEX m_bar_idex(
     .BrUn_in(BrUn),.BrUn_out(BrUn_idex_out),
     .LUI_in(LUI),    .LUI_out(LUI_idex_out),
     .DMOn_in(DMOn), .DMOn_out(DMOn_idex_out),
-    .CSRAddr_in(CSRAddr), .CSRAddr_out(CSRAddr_idex_out),
+    .CSRWEn_in(CSRWEn), .CSRWEn_out(CSRWEn_idex_out),
     .DMstall_axi(DMstall_axi),
     .PCstall_axi(PCstall_axi)
 );
@@ -246,26 +231,58 @@ PCSel m_pcsel(
     .PCSel(PCSel)
 );
 
-//Mux2_32 m_luisel(.out(lui_out),.sel(LUI_idex_out),.in0(pc_idex_out),.in1(32'b0));
-//Mux2_32 m_asel  (.out(a_out),.sel(ASel_idex_out),.in0(fwd1),.in1(lui_out));
-//Mux2_32 m_bsel  (.out(b_out),.sel(BSel_idex_out),.in0(fwd2),.in1(imm_idex_out));
-
 assign lui_out = (LUI_idex_out == 1'b0) ? pc_idex_out : 32'b0;
 assign a_out = (ASel_idex_out == 1'b0) ? fwd1 : lui_out;
 assign b_out = (BSel_idex_out == 1'b0) ? fwd2 : imm_idex_out;
 
+ALU m_alu(
+    .src1(a_out),
+    .src2(b_out),
+    .ALUSel(ALUSel_idex_out),
+    .ALUOut(ALUOut)
+);
 
-ALU m_alu(.src1(a_out),.src2(b_out),.ALUSel(ALUSel_idex_out),.ALUOut(ALUOut));
+RegFile m_regfile(
+    .clk(clk),
+    .rst(rst),
+
+    //todo : put the signal 
+    .wen(RegWEn_mewb_out),
+    .wa(rda_mewb_out), 
+    .wd(WBdata),
+
+    .r1a(r1a_idex_out), .r1d(r1d),
+    .r2a(r2a_idex_out), .r2d(r2d),
+
+    .PCstall_axi(PCstall_axi)
+);
 
 assign retire = (opcode_idex_out == 7'b0) ? 1'b0 : 1'b1;
 
 CSReg m_csr(
     .clk(clk),
     .rst(rst),
+    
+    .raddr(imm_idex_out[11:0]),
+    .rdata(CSR_rdata),
+
+    .waddr(imm_idex_out[11:0]),
+    .wdata(CSRLUOut),
+    .wen(CSRWEn_idex_out),
+
     .retire(retire),
-    .addr(CSRAddr_idex_out),
-    .data(CSRData),
     .PCstall_axi(PCstall_axi)
+);
+
+// chose uimm or register value by left bit of funct3
+assign CSR_rs1 = (funct3_idex_out[2])? {27'b0,r1a_idex_out} : fwd1;
+
+CSRLU m_csrlu(
+    .csr(CSR_rdata),
+    .rs1(CSR_rs1),
+    .funct3(funct3_idex_out),
+
+    .CSRLUOut(CSRLUOut)
 );
 
 Bar_EXME m_bar_exme(
@@ -280,7 +297,8 @@ Bar_EXME m_bar_exme(
     .DMOn_in(DMOn_idex_out), .DMOn_out(DMOn_exme_out),
     .WBSel_in(WBSel_idex_out),.WBSel_out(WBSel_exme_out),
     .RegWEn_in(RegWEn_idex_out),.RegWEn_out(RegWEn_exme_out),
-    .CSRData_in(CSRData), .CSRData_out(CSRData_exme_out),
+    .CSR_rdata_in(CSR_rdata), .CSR_rdata_out(CSR_rdata_exme_out),
+
     .DMstall_axi(DMstall_axi),
     .PCstall_axi(PCstall_axi)
 );
@@ -304,7 +322,7 @@ Bar_MEWB m_bar_mewb(
     .funct3_in(funct3_exme_out),.funct3_out(funct3_mewb_out),
     .WBSel_in(WBSel_exme_out),.WBSel_out(WBSel_mewb_out),
     .RegWEn_in(RegWEn_exme_out),.RegWEn_out(RegWEn_mewb_out),
-    .CSRData_in(CSRData_exme_out), .CSRData_out(CSRData_mewb_out),
+    .CSR_rdata_in(CSR_rdata_exme_out), .CSR_rdata_out(CSR_rdata_mewb_out),
     .PCstall_axi(PCstall_axi)
 );
 
@@ -350,8 +368,11 @@ end
 assign WBdata = (WBSel_mewb_out == 2'd0) ? DMRdata_masked :
                 (WBSel_mewb_out == 2'd1) ? ALUOut_mewb_out :
                 (WBSel_mewb_out == 2'd2) ? pc_added :
-                (WBSel_mewb_out == 2'd3) ? CSRData_mewb_out :
+                (WBSel_mewb_out == 2'd3) ? CSR_rdata_mewb_out :
                 32'b0 ;
+
+logic [31:0] Data_ME;
+assign Data_ME = (WBSel_exme_out == 2'd3)? CSR_rdata_exme_out : ALUOut_exme_out;
 
 /* Fowarding */
 Forward m_forward(
@@ -366,7 +387,7 @@ Forward m_forward(
 
     // Data from EX, ME, WB
     .Data_WB(WBdata),
-    .Data_ME(ALUOut_exme_out),
+    .Data_ME(Data_ME),
     .Data1_EX(r1d),    
     .Data2_EX(r2d),
 
