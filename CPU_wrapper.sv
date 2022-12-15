@@ -244,7 +244,7 @@ end
 assign ARADDR_M1 = ARADDR_M1_reg;
 
 assign ARID_M1 = 4'b0;
-assign ARLEN_M1 = 4'b0011; // burst: 4 beat
+assign ARLEN_M1 = (ARADDR_M1[31:10] == 22'h040000)? 4'b0000 : 4'b0011; // burst: 4 beat for slave except sensor (slave 3)
 assign ARSIZE_M1 = 3'd2; // data size 4 bytes
 assign ARBURST_M1 = `AXI_BURST_INC;
 

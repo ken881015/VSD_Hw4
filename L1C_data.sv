@@ -71,22 +71,25 @@ module L1C_data(
     assign DA_read = 1'b1;
     assign TA_read = 1'b1;
 
-    localparam Idle      = 3'd0;
-    localparam Judge_R   = 3'd1; 
-    localparam ReadMiss  = 3'd2; // read a line from memory
-    localparam Judge_W   = 3'd3; 
-    localparam WriteHit  = 3'd4; // write data into cache and memory
-    localparam WriteMiss = 3'd5; // only write data into memory
+    localparam Idle        = 3'd0;
+    localparam Judge_R     = 3'd1; 
+    localparam ReadMiss    = 3'd2; // read a line from memory
+    localparam Uncacheable = 3'd3;
+    localparam Judge_W     = 3'd4; 
+    localparam WriteHit    = 3'd5; // write data into cache and memory
+    localparam WriteMiss   = 3'd6; // only write data into memory
 
     // instant for data accessing
     assign index = core_addr[9:4];
 
     logic [1:0] offset;
     logic TA_match;
+    logic cacheable;
 
     assign TA_in  = core_addr [31:10];
     assign offset = core_addr [3:2];
     assign TA_match = (TA_in == TA_out);
+    assign cacheable = core_addr [31:10] != 22'h040000;
     
     //Read  
     always_ff @( posedge clk or posedge rst) begin
@@ -102,7 +105,16 @@ module L1C_data(
             
             Judge_R : nxt_state = (TA_match && valid[index])?  Idle : ReadMiss; // TA_out is obtaion by core_addr in Idle
 
-            ReadMiss : nxt_state = (counter == 2'b11 && !D_wait)? Judge_R : ReadMiss;
+            ReadMiss : begin
+                if(cacheable) begin
+                    nxt_state = (counter == 2'b11 && !D_wait)? Judge_R : ReadMiss;
+                end
+                else begin
+                    nxt_state = Uncacheable;
+                end
+            end
+
+            Uncacheable : nxt_state = (!D_wait)? Idle : Uncacheable;
 
             Judge_W : nxt_state = (TA_match && valid[index])?  WriteHit : WriteMiss;
 
@@ -161,12 +173,15 @@ module L1C_data(
                 2'b11 : core_out = DA_out[127:96];
             endcase
         end
+        else if(state == Uncacheable && !D_wait) begin
+            core_out = D_out;
+        end
         else begin
             core_out = 32'b0;
         end
     end
 
-    assign core_wait = ((state==Judge_R) && (TA_match && valid[index]))? 1'b0 : 1'b1;
+    assign core_wait = ((state==Judge_R) && (TA_match && valid[index])) || (state == Uncacheable && !D_wait)? 1'b0 : 1'b1;
     assign D_req = (state == ReadMiss || state == WriteMiss || state == WriteHit)? 1'b1 : 1'b0;
 	assign D_addr = (state == ReadMiss || state == WriteMiss || state == WriteHit)? core_addr : 32'b0;
     

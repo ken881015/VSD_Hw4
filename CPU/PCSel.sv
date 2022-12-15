@@ -5,6 +5,9 @@ module PCSel(
     input [2:0] funct3,
     input BrEq,
     input BrLT,
+    input wfi,
+    input mret,
+    input ex_interrupt,
     output logic PCSel
 );
 
@@ -19,6 +22,12 @@ always_comb begin
         else PCSel = 1'b0;
     end
     else if (opcode == `JAL || opcode == `JALR) begin
+        PCSel = 1'b1;
+    end
+    else if (wfi && ex_interrupt) begin
+        PCSel = 1'b1;
+    end
+    else if (mret) begin
         PCSel = 1'b1;
     end
     else begin

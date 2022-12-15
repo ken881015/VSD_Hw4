@@ -89,6 +89,8 @@ logic BrUn_idex_out;
 logic LUI_idex_out;
 logic DMOn_idex_out;
 logic CSRWEn_idex_out;
+logic wfi;
+logic mret;
 logic[31:0] lui_out;
 logic[31:0] a_out;
 logic[31:0] b_out;
@@ -128,12 +130,15 @@ end
 // Output PC for Instruction Memory and wait for Instruction back.
 assign face_pc = pc;
 
+logic[31:0] PC_jmp;
+assign PC_jmp = (wfi || mret)? CSR_rdata : ALUOut;
+
 PC m_pc(
     .clk(clk),
     .rst(rst),
     .PCSel_EX(PCSel),
     .DH_flush(DH_flush),
-    .ALUOut(ALUOut),
+    .PC_jmp(PC_jmp),
     .pc_out(pc),
 
     // modification due to axi
@@ -218,9 +223,8 @@ Bar_IDEX m_bar_idex(
 );
 
 /* stage 3 */
-
-logic wfi;
-assign wfi = (opcode_idex_out == `SYSTEM) && funct3_idex_out == 3'b0;
+assign wfi  = (opcode_idex_out == `SYSTEM) && (imm_idex_out == 32'h105);
+assign mret = (opcode_idex_out == `SYSTEM) && (imm_idex_out == 32'h302);
 
 BranchComp m_branchcomp(
     .BrUn(BrUn_idex_out),
@@ -235,6 +239,9 @@ PCSel m_pcsel(
     .funct3(funct3_idex_out),
     .BrEq(BrEq),
     .BrLT(BrLT),
+    .wfi(wfi),
+    .mret(mret),
+    .ex_interrupt(ex_interrupt),
     .PCSel(PCSel)
 );
 
@@ -270,10 +277,9 @@ CSReg m_csr(
     .clk(clk),
     .rst(rst),
     
-    .raddr(imm_idex_out[11:0]),
+    .addr(imm_idex_out[11:0]),
     .rdata(CSR_rdata),
 
-    .waddr(imm_idex_out[11:0]),
     .wdata(CSRLUOut),
     .wen(CSRWEn_idex_out),
 
@@ -281,11 +287,12 @@ CSReg m_csr(
     .PCstall_axi(PCstall_axi),
 
     .wfi(wfi),
+    .mret(mret),
     .ex_interrupt(ex_interrupt)
 );
 
 // chose uimm or register value by left bit of funct3
-assign CSR_csr = (|funct3_idex_out)? CSR_rdata : (pc_idex_out + 32'd4);
+assign CSR_csr = (|funct3_idex_out)? CSR_rdata : pc_idex_out;
 assign CSR_rs1 = (funct3_idex_out[2])? {27'b0,r1a_idex_out} : fwd1;
 
 CSRLU m_csrlu(

@@ -3,11 +3,10 @@ module CSReg(
     input rst,
 
     // Read
-    input[11:0] raddr,
+    input[11:0] addr,
     output logic [31:0] rdata,
 
     // Write
-    input[11:0] waddr,
     input[31:0] wdata,
     input       wen,
 
@@ -15,10 +14,13 @@ module CSReg(
     input PCstall_axi,
 
     input wfi,
+    input mret,
     input ex_interrupt
 );
 
 localparam WFI       = 12'h105;
+localparam MRET      = 12'h302;
+
 localparam Mstatus   = 12'h300; // 0
 localparam Mie       = 12'h304; // 1
 localparam Mtvec     = 12'h305; // 2 
@@ -65,35 +67,41 @@ always_ff @(posedge rst or posedge clk) begin
         //     {CSRegs[8],CSRegs[6]} <= {CSRegs[8],CSRegs[6]} + 64'd1;
         // end
         
-
-        // Write by instruction
-        if(!PCstall_axi && (wen && waddr != 12'd0))begin
-            case(waddr)
-                Mstatus  : begin
-                    MPP <= wdata[12:11];
-                    MPIE <= wdata[7];
-                    MIE <= wdata[3];
+        if(ex_interrupt)begin
+            if(!PCstall_axi)begin
+                if((wen && addr == WFI)) begin
+                    mepc <= wdata + 32'd4;
                 end
-                Mie      : begin
-                    MEIE <= wdata[11];
-                    MTIE <= wdata[7];
-                end  
-                Mepc     : mepc <= wdata;
-                WFI      : if (ex_interrupt) mepc <= wdata;
-            endcase
+                
+                MPIE <= MIE;
+                MIE <= 1'b0;
+                MPP <= 2'b11;
+            end
         end
 
-        // // Write by interuption
-        // else if(interrupt) begin
-        //     MPIE <= MIE;
-        //     MIE <= 1'b0;
-        //     MPP <= 2'b11;
-        // end
+        else begin
+            // Write by instruction
+            if(!PCstall_axi && (wen && addr != 12'd0))begin
+                case(addr)
+                    Mstatus  : begin
+                        MPP <= wdata[12:11];
+                        MPIE <= wdata[7];
+                        MIE <= wdata[3];
+                    end
+                    Mie      : begin
+                        MEIE <= wdata[11];
+                        MTIE <= wdata[7];
+                    end  
+                    Mepc     : mepc <= wdata;
+                    WFI      : mepc <= wdata;
+                endcase
+            end
+        end
     end
 end
 
 always_comb begin
-    case(raddr)
+    case(addr)
         Mstatus   : rdata = {19'b0,MPP,3'b0,MPIE,3'b0,MIE,3'b0};
         Mie       : rdata = {20'b0,MEIE,3'b0,MTIE,7'b0};
         Mtvec     : rdata = mtvec;
@@ -103,6 +111,9 @@ always_comb begin
         // Minstret  : rdata = CSRegs[6];
         // Mcycleh   : rdata = CSRegs[7];
         // Minstreth : rdata = CSRegs[8];
+        WFI       : rdata = mtvec;
+        MRET      : rdata = mepc;
+
         default   : rdata = 32'b0;
     endcase
 end
