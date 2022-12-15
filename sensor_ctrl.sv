@@ -11,12 +11,15 @@ module sensor_ctrl(
   input sctrl_en,
   input sctrl_clear,
   input [5:0] sctrl_addr,
-  // Sensor inputs
-  input sensor_ready,
-  input [31:0] sensor_out,
+  
   // Core outputs
   output logic sctrl_interrupt,
   output logic [31:0] sctrl_out,
+
+  
+  // Sensor inputs
+  input sensor_ready,
+  input [31:0] sensor_out,
   // Sensor outputs
   output logic sensor_en
 );

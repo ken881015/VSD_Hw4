@@ -29,7 +29,7 @@ always_comb begin
         `JALR:   ImmSel = `Itype;
         `LUI:    ImmSel = `Utype;
         `AUIPC:  ImmSel = `Utype;
-        `CSR:    ImmSel = `Itype;
+        `SYSTEM: ImmSel = `Itype;
         default: ImmSel =   3'b0;
     endcase
 end
@@ -75,7 +75,7 @@ end
 always_comb begin
     unique if(opcode == `LOAD)                 WBSel = 2'd0; // from Data Memory
     else if(opcode == `JAL || opcode == `JALR) WBSel = 2'd2; // from PC+4
-    else if(opcode == `CSR)                    WBSel = 2'd3; // from CSR value
+    else if(opcode == `SYSTEM)                 WBSel = 2'd3; // from CSR value
     else                                       WBSel = 2'd1; // from ALU
 end
 
@@ -83,6 +83,6 @@ assign LUI = (opcode == `LUI);
 
 assign DMOn = (opcode == `LOAD || opcode == `STORE);
 
-assign CSRWEn = opcode == `CSR;
+assign CSRWEn = opcode == `SYSTEM;
 
 endmodule

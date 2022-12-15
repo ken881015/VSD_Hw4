@@ -8,6 +8,8 @@ module CPU_wrapper (
     input ACLK,
 	input ARESETn,
 
+    input ex_interrupt,
+
     // CPU: Inst Mem Read Channel (Master 0)
     //READ ADDRESS0
 	output logic [`AXI_ID_BITS-1:0] ARID_M0,
@@ -332,7 +334,8 @@ CPU m_cpu(
 
     // Modification signal due to AXI properties
     .PCstall_axi(PCstall_axi), // resolve monitor 0 stable issue of raddr
-    .DMstall_axi(DMstall_axi)
+    .DMstall_axi(DMstall_axi),
+    .ex_interrupt(ex_interrupt)
 );
 
 

@@ -33,7 +33,9 @@ module CPU(
     input  [31:0] face_Rdata,
     
     input PCstall_axi,
-    input DMstall_axi
+    input DMstall_axi,
+
+    input ex_interrupt
 );
 
 logic [31:0] ALUOut;
@@ -90,6 +92,7 @@ logic CSRWEn_idex_out;
 logic[31:0] lui_out;
 logic[31:0] a_out;
 logic[31:0] b_out;
+logic[31:0] CSR_csr;
 logic[31:0] CSR_rs1;
 logic[31:0] CSRLUOut;
 logic[31:0] pc_exme_out;
@@ -215,6 +218,10 @@ Bar_IDEX m_bar_idex(
 );
 
 /* stage 3 */
+
+logic wfi;
+assign wfi = (opcode_idex_out == `SYSTEM) && funct3_idex_out == 3'b0;
+
 BranchComp m_branchcomp(
     .BrUn(BrUn_idex_out),
     .src1(fwd1),
@@ -271,14 +278,18 @@ CSReg m_csr(
     .wen(CSRWEn_idex_out),
 
     .retire(retire),
-    .PCstall_axi(PCstall_axi)
+    .PCstall_axi(PCstall_axi),
+
+    .wfi(wfi),
+    .ex_interrupt(ex_interrupt)
 );
 
 // chose uimm or register value by left bit of funct3
+assign CSR_csr = (|funct3_idex_out)? CSR_rdata : (pc_idex_out + 32'd4);
 assign CSR_rs1 = (funct3_idex_out[2])? {27'b0,r1a_idex_out} : fwd1;
 
 CSRLU m_csrlu(
-    .csr(CSR_rdata),
+    .csr(CSR_csr),
     .rs1(CSR_rs1),
     .funct3(funct3_idex_out),
 

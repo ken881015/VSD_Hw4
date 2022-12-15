@@ -301,7 +301,7 @@ module AXI(
 				// Master 0 read behavior (with Slave 0) completed
 				if((RLAST_S0 && RREADY_M0 && RVALID_S0) || 
 				   (RLAST_S1 && RREADY_M0 && RVALID_S1) ||
-				//    (RLAST_S3 && RREADY_M0 && RVALID_S3) ||
+				   (RLAST_S3 && RREADY_M0 && RVALID_S3) ||
 				//    (RLAST_S4 && RREADY_M0 && RVALID_S4) ||
 				   (RLAST_S5 && RREADY_M0 && RVALID_S5))begin
 					chance <= ~chance;
@@ -311,13 +311,13 @@ module AXI(
 				else if(((RLAST_S0 && RREADY_M1 && RVALID_S0) || 
 				         (RLAST_S1 && RREADY_M1 && RVALID_S1) ||
 						 (RLAST_S2 && RREADY_M1 && RVALID_S2) ||
-						//  (RLAST_S3 && RREADY_M1 && RVALID_S3) || 
+						 (RLAST_S3 && RREADY_M1 && RVALID_S3) || 
 						//  (RLAST_S4 && RREADY_M1 && RVALID_S4) ||
 						 (RLAST_S5 && RREADY_M1 && RVALID_S5)) ||
 
 				        ((BREADY_M1 && BVALID_S1) || 
 						 (BREADY_M1 && BVALID_S2) ||
-						//  (BREADY_M1 && BVALID_S3) || 
+						 (BREADY_M1 && BVALID_S3) || 
 						//  (BREADY_M1 && BVALID_S4) || 
 						 (BREADY_M1 && BVALID_S5))) begin
 					chance <= ~chance;
@@ -352,7 +352,7 @@ module AXI(
 			Read_M0:begin
 				nxt_state_R = ((RLAST_S0 && RREADY_M0 && RVALID_S0) || 
 				               (RLAST_S1 && RREADY_M0 && RVALID_S1) ||
-							//    (RLAST_S3 && RREADY_M0 && RVALID_S3) ||
+							   (RLAST_S3 && RREADY_M0 && RVALID_S3) ||
 							//    (RLAST_S4 && RREADY_M0 && RVALID_S4) ||
 							   (RLAST_S5 && RREADY_M0 && RVALID_S5))? IDLE : Read_M0;
 			end
@@ -360,7 +360,7 @@ module AXI(
 				nxt_state_R = ((RLAST_S0 && RREADY_M1 && RVALID_S0) || 
 				               (RLAST_S1 && RREADY_M1 && RVALID_S1) || 
 							   (RLAST_S2 && RREADY_M1 && RVALID_S2) ||
-							//    (RLAST_S3 && RREADY_M1 && RVALID_S3) ||
+							   (RLAST_S3 && RREADY_M1 && RVALID_S3) ||
 							//    (RLAST_S4 && RREADY_M1 && RVALID_S4) ||
 							   (RLAST_S5 && RREADY_M1 && RVALID_S5))? IDLE : Read_M1;
 			end
@@ -736,7 +736,7 @@ module AXI(
 		Write_M1:begin
 			nxt_state_W = ((BREADY_M1 && BVALID_S1) ||
 			               (BREADY_M1 && BVALID_S2) || 
-						//    (BREADY_M1 && BVALID_S3) || 
+						   (BREADY_M1 && BVALID_S3) || 
 						//    (BREADY_M1 && BVALID_S4) || 
 						   (BREADY_M1 && BVALID_S5))? IDLE : Write_M1;
 		end

@@ -6,6 +6,7 @@
 `include "CPU_wrapper.sv"
 `include "SRAM_wrapper.sv"
 `include "ROM_wrapper.sv"
+`include "sctrl_wrapper.sv"
 `include "DRAM_wrapper.sv"
 `include "tag_array_wrapper.sv"
 `include "data_array_wrapper.sv"
@@ -20,9 +21,9 @@ module top(
 	input rst2,
 
 	// Connect with Sensor
-	input sensor_ready,
+	input        sensor_ready,
 	input [31:0] sensor_out,
-	output sensor_en,
+	output       sensor_en,
 	
 	// Connect with ROM
 	input[31:0] ROM_out,
@@ -290,10 +291,15 @@ module top(
 	logic                      RVALID_S5;
 	logic                      RREADY_S5;
 
+	// Interuption
+	logic sctrl_interrupt;
+
 	// Master 0 & 1
 	CPU_wrapper m_cpu_wrapper(
     	.ACLK(clk),
     	.ARESETn(~rst),
+
+		.ex_interrupt(sctrl_interrupt),
 
 		//READ ADDRESS0
 		.ARID_M0(ARID_M0),
@@ -725,14 +731,53 @@ module top(
 	);
 
 	// slave 3
-	// sensor_ctrl sensor_ctrl(
-	// 	.clk(),
-	// 	.rst(),
-	// 	.sctrl_en(),
-	// 	.sctrl_clear(),
-	// 	.sctrl_addr(),
-	// 	.sens
-	// );
+	sctrl_wrapper sctrl_wrapper(
+		.ACLK(clk),
+		.ARESET(rst),
+
+		// Connect with Sensor
+		.sensor_ready(sensor_ready),
+		.sensor_out(sensor_out),
+		.sensor_en(sensor_en),
+
+		// Connect with CPU skip AXI
+  		.sctrl_interrupt(sctrl_interrupt),
+
+		// AXI slave 3 ports
+		.AWID_S(AWID_S3),
+		.AWADDR_S(AWADDR_S3),
+		.AWLEN_S(AWLEN_S3),
+		.AWSIZE_S(AWSIZE_S3),
+		.AWBURST_S(AWBURST_S3),
+		.AWVALID_S(AWVALID_S3),
+		.AWREADY_S(AWREADY_S3),
+
+		.WDATA_S(WDATA_S3),
+		.WSTRB_S(WSTRB_S3),
+		.WLAST_S(WLAST_S3),
+		.WVALID_S(WVALID_S3),
+		.WREADY_S(WREADY_S3),
+
+		.BID_S(BID_S3),
+		.BRESP_S(BRESP_S3),
+		.BVALID_S(BVALID_S3),
+		.BREADY_S(BREADY_S3),
+
+		.ARID_S(ARID_S3),
+		.ARADDR_S(ARADDR_S3),
+		.ARLEN_S(ARLEN_S3),
+		.ARSIZE_S(ARSIZE_S3),
+		.ARBURST_S(ARBURST_S3),
+		.ARVALID_S(ARVALID_S3),
+		.ARREADY_S(ARREADY_S3),
+
+		.RID_S(RID_S3),
+		.RDATA_S(RDATA_S3),
+		.RRESP_S(RRESP_S3),
+		.RLAST_S(RLAST_S3),
+		.RVALID_S(RVALID_S3),
+		.RREADY_S(RREADY_S3)
+	);
 
 	// slave 4
 	// WDT_wrapper WDT1(
