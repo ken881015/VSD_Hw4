@@ -97,6 +97,7 @@ always_ff @(posedge rst or posedge clk) begin
         // if(retire == 1'b1) begin
         //     {CSRegs[8],CSRegs[6]} <= {CSRegs[8],CSRegs[6]} + 64'd1;
         // end
+        
         if(!PCstall_axi) begin
             if(state == Wait_itrpt) begin
                 // Write due to interupt taken
@@ -105,29 +106,11 @@ always_ff @(posedge rst or posedge clk) begin
                     MIE  <= 1'b0;
                     MPP  <= 2'b11;
                 end
-                else begin
-                    // Write by instruction
-                    if(wen)begin
-                        case(addr)
-                            Mstatus  : begin
-                                MPP <= wdata[12:11];
-                                MPIE <= wdata[7];
-                                MIE <= wdata[3];
-                            end
-                            Mie      : begin
-                                MEIE <= wdata[11];
-                                MTIE <= wdata[7];
-                            end  
-                            Mepc     : mepc <= wdata;
-                        endcase
-                    end
-                end
             end
-
             else if (state == Taken_itrpt) begin
                 // Only Record the effective inst then jump to mtvec. 
                 if(!nop) begin
-                    mepc <= (wfi)? pc+32'd4 : pc;
+                    mepc <= pc+32'd4;
                 end
             end
             else if (state == ISR && mret) begin
@@ -135,6 +118,23 @@ always_ff @(posedge rst or posedge clk) begin
                 MIE  <= MPIE;
                 MPP  <= 2'b11;
             end
+
+            // Write by instruction
+            if(wen)begin
+                case(addr)
+                    Mstatus  : begin
+                        MPP <= wdata[12:11];
+                        MPIE <= wdata[7];
+                        MIE <= wdata[3];
+                    end
+                    Mie      : begin
+                        MEIE <= wdata[11];
+                        MTIE <= wdata[7];
+                    end  
+                    Mepc     : mepc <= wdata;
+                endcase
+            end
+
         end
     end
 end
