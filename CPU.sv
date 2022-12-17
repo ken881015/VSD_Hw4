@@ -70,6 +70,7 @@ logic DMOn;
 logic CSRWEn;
 logic retire;
 logic [31:0] CSR_rdata;
+logic [31:0] PC_isr;
 logic [31:0] pc_idex_out;
 logic [4:0] r1a_idex_out;
 logic [4:0] r2a_idex_out;
@@ -89,7 +90,6 @@ logic BrUn_idex_out;
 logic LUI_idex_out;
 logic DMOn_idex_out;
 logic CSRWEn_idex_out;
-logic wfi;
 logic mret;
 logic[31:0] lui_out;
 logic[31:0] a_out;
@@ -131,7 +131,7 @@ end
 assign face_pc = pc;
 
 logic[31:0] PC_jmp;
-assign PC_jmp = (wfi || mret)? CSR_rdata : ALUOut;
+assign PC_jmp = (PC_isr || mret)? CSR_rdata : ALUOut;
 
 PC m_pc(
     .clk(clk),
@@ -223,7 +223,6 @@ Bar_IDEX m_bar_idex(
 );
 
 /* stage 3 */
-assign wfi  = (opcode_idex_out == `SYSTEM) && (imm_idex_out == 32'h105);
 assign mret = (opcode_idex_out == `SYSTEM) && (imm_idex_out == 32'h302);
 
 BranchComp m_branchcomp(
@@ -239,9 +238,8 @@ PCSel m_pcsel(
     .funct3(funct3_idex_out),
     .BrEq(BrEq),
     .BrLT(BrLT),
-    .wfi(wfi),
+    .PC_isr(PC_isr),
     .mret(mret),
-    .ex_interrupt(ex_interrupt),
     .PCSel(PCSel)
 );
 
@@ -273,6 +271,10 @@ RegFile m_regfile(
 
 assign retire = (opcode_idex_out == 7'b0) ? 1'b0 : 1'b1;
 
+logic nop;
+logic wfi;
+assign nop = !(|opcode_idex_out);
+assign wfi = (opcode_idex_out == `SYSTEM) && (imm_idex_out == 32'h105);
 CSReg m_csr(
     .clk(clk),
     .rst(rst),
@@ -286,7 +288,10 @@ CSReg m_csr(
     .retire(retire),
     .PCstall_axi(PCstall_axi),
 
+    .nop(nop),
     .wfi(wfi),
+    .PC_isr(PC_isr),
+    .pc(pc_idex_out),
     .mret(mret),
     .ex_interrupt(ex_interrupt)
 );
@@ -324,7 +329,6 @@ Bar_EXME m_bar_exme(
 /* stage 4 */
 
 // Output Address calculated by ALU for Data Memory with some control signals,
-// 
 assign face_ALUOut = ALUOut_exme_out;
 assign face_Wdata = fwd2_exme_out;
 assign face_MemRW = MemRW_exme_out;
