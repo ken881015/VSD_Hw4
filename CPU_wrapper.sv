@@ -9,6 +9,7 @@ module CPU_wrapper (
 	input ARESETn,
 
     input ex_interrupt,
+    input tm_interrupt,
 
     // CPU: Inst Mem Read Channel (Master 0)
     //READ ADDRESS0
@@ -335,7 +336,8 @@ CPU m_cpu(
     // Modification signal due to AXI properties
     .PCstall_axi(PCstall_axi), // resolve monitor 0 stable issue of raddr
     .DMstall_axi(DMstall_axi),
-    .ex_interrupt(ex_interrupt)
+    .ex_interrupt(ex_interrupt),
+    .tm_interrupt(tm_interrupt)
 );
 
 

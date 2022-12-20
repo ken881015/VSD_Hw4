@@ -35,7 +35,8 @@ module CPU(
     input PCstall_axi,
     input DMstall_axi,
 
-    input ex_interrupt
+    input ex_interrupt,
+    input tm_interrupt
 );
 
 logic [31:0] ALUOut;
@@ -293,7 +294,8 @@ CSReg m_csr(
     .PC_isr(PC_isr),
     .pc(pc_idex_out),
     .mret(mret),
-    .ex_interrupt(ex_interrupt)
+    .ex_interrupt(ex_interrupt),
+    .tm_interrupt(tm_interrupt)
 );
 
 // chose uimm or register value by left bit of funct3

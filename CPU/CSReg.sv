@@ -24,7 +24,8 @@ module CSReg(
     input wfi,
     input [31:0] pc,
     input mret,
-    input ex_interrupt
+    input ex_interrupt,
+    input tm_interrupt
 );
 
 localparam MRET      = 12'h302;
@@ -64,7 +65,9 @@ enum logic[2:0]{
 
 
 always_ff @(posedge rst or posedge clk) begin
-    if(rst) state <= 3'b0;
+    if(rst) begin
+        state <= Wait_itrpt;
+    end
     else begin
         if(!PCstall_axi) state <= nxt_state;
     end

@@ -11,53 +11,21 @@ module WDT(
   output logic WTO
 );
 
-logic [31:0] counter;
-logic WTO_s1;
-logic WTO_s2;
+//watchdog timer
+logic [31:0] cnt;
 
-always_ff@(posedge clk2 or posedge rst or posedge rst2) begin
-	if(rst || rst2) begin
-		counter <= 32'b0;
-		WTO_s1 <= 1'b0;
-	end
+always_ff@(posedge clk2) begin
+	if(rst2) cnt <= 32'b0;
+
 	else begin
 		if(WDEN) begin
-			if(WDLIVE) begin
-				counter <= 32'b0;
-				WTO_s1 <= 1'b0;
-			end
-			else if(counter > WTOCNT) begin
-				counter <= counter;
-				WTO_s1 <= 1'b1;
-			end
-			else begin
-				counter <= counter + 32'b1;
-				WTO_s1 <= 1'b0;
-			end
+			if(WDLIVE) cnt <= 32'b0;
+			else cnt <= (cnt == WTOCNT)? cnt : cnt + 32'b1;
 		end
-		else begin
-			counter <= 32'b0;
-			WTO_s1 <= 1'b0;
-		end
+		else cnt <= 32'b0;
 	end
 end
 
-always_ff@(posedge clk or posedge rst or posedge rst2) begin
-	if(rst || rst2) begin
-		WTO_s2 <= 1'b0;
-	end
-	else begin
-		WTO_s2 <= WTO_s1;
-	end
-end
-
-always_ff@(posedge clk or posedge rst or posedge rst2) begin
-	if(rst || rst2) begin
-		WTO <= 1'b0;
-	end
-	else begin
-		WTO <= WTO_s2;
-	end
-end
+assign WTO = WDEN && (cnt == WTOCNT);
 
 endmodule

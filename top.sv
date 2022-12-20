@@ -7,10 +7,12 @@
 `include "SRAM_wrapper.sv"
 `include "ROM_wrapper.sv"
 `include "sctrl_wrapper.sv"
+`include "WDT_wrapper.sv"
 `include "DRAM_wrapper.sv"
 `include "tag_array_wrapper.sv"
 `include "data_array_wrapper.sv"
 `include "AXI/AXI.sv"
+`include "S2F_cdc.sv"
 
 module top(
     input clk,
@@ -293,6 +295,8 @@ module top(
 
 	// Interuption
 	logic sctrl_interrupt;
+	logic t_interrupt_slow;
+	logic t_interrupt_fast;
 
 	// Master 0 & 1
 	CPU_wrapper m_cpu_wrapper(
@@ -300,6 +304,7 @@ module top(
     	.ARESETn(~rst),
 
 		.ex_interrupt(sctrl_interrupt),
+		.tm_interrupt(t_interrupt_fast),
 
 		//READ ADDRESS0
 		.ARID_M0(ARID_M0),
@@ -780,9 +785,33 @@ module top(
 	);
 
 	// slave 4
-	// WDT_wrapper WDT1(
+	WDT_wrapper WDT1(
+		.clk(clk),
+		.rst(rst),
+		.clk2(clk2),
+		.rst2(rst2),
+		
+		.WTO(t_interrupt_slow),
+		
+		.AWID_S(AWID_S4),
+		.AWADDR_S(AWADDR_S4),
+		.AWLEN_S(AWLEN_S4),
+		.AWSIZE_S(AWSIZE_S4),
+		.AWBURST_S(AWBURST_S4),
+		.AWVALID_S(AWVALID_S4),
+		.AWREADY_S(AWREADY_S4),
 
-	// );
+		.WDATA_S(WDATA_S4),
+		.WSTRB_S(WSTRB_S4),
+		.WLAST_S(WLAST_S4),
+		.WVALID_S(WVALID_S4),
+		.WREADY_S(WREADY_S4),
+
+		.BID_S(BID_S4),
+		.BRESP_S(BRESP_S4),
+		.BVALID_S(BVALID_S4),
+		.BREADY_S(BREADY_S4)
+	);
 
 	// slave 5
 	DRAM_wrapper DRAM_W1(
@@ -834,4 +863,15 @@ module top(
 		.DRAM_valid(DRAM_valid)
 	);
 
+	
+
+	S2F_cdc m_s2f(
+		.f_clk(clk),
+		.f_rst(rst),
+		.s_clk(clk2),
+		.s_rst(rst2),
+
+		.in(t_interrupt_slow),
+		.out(t_interrupt_fast)
+	);
 endmodule

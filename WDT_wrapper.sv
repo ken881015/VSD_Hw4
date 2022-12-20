@@ -9,7 +9,7 @@ module WDT_wrapper(
   input clk2,
   input rst2,
   
-  output WTO;
+  output WTO,
   //WRITE ADDRESS
   input [`AXI_IDS_BITS-1:0]  AWID_S,
   input [`AXI_ADDR_BITS-1:0] AWADDR_S,
@@ -28,22 +28,7 @@ module WDT_wrapper(
   output logic [`AXI_IDS_BITS-1:0] BID_S,
   output logic [1:0]               BRESP_S,
   output logic                     BVALID_S,
-  input                            BREADY_S,
-  //READ ADDRESS
-  input [`AXI_IDS_BITS-1:0]  ARID_S,
-  input [`AXI_ADDR_BITS-1:0] ARADDR_S,
-  input [`AXI_LEN_BITS-1:0]  ARLEN_S,
-  input [`AXI_SIZE_BITS-1:0] ARSIZE_S,
-  input [1:0]                ARBURST_S,
-  input                      ARVALID_S,
-  output logic               ARREADY_S,
-  //READ DATA
-  output logic [`AXI_IDS_BITS-1:0]  RID_S,
-  output logic [`AXI_DATA_BITS-1:0] RDATA_S,
-  output logic [1:0]                RRESP_S,
-  output logic                      RLAST_S,
-  output logic                      RVALID_S,
-  input                             RREADY_S
+  input                            BREADY_S
 );
 
 logic [11:0] A_reg;
@@ -77,15 +62,12 @@ always_ff@(posedge clk or posedge rst) begin
 		WTOCNT <= 32'b0;
     end
     else begin
-        if(ARREADY_S && ARVALID_S) begin
-            A_reg <= ARADDR_S[11:0];
-        end
-        else if(AWREADY_S && AWVALID_S) begin
+        if(AWREADY_S && AWVALID_S) begin
             A_reg <= AWADDR_S[11:0];
         end
 
         if(WREADY_S && WVALID_S) begin
-            if(A_reg == 12'h100) WDEN <= WDATA_S;
+            if(A_reg == 12'h100) WDEN   <= WDATA_S;
             if(A_reg == 12'h200) WDLIVE <= WDATA_S;
 			if(A_reg == 12'h300) WTOCNT <= WDATA_S;
         end
@@ -148,7 +130,7 @@ WDT WDT_m(
   .WDLIVE(WDLIVE),
   .WTOCNT(WTOCNT),
 
-  .WTO(WTO),
+  .WTO(WTO)
 
 );
 endmodule
