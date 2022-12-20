@@ -75,7 +75,7 @@ end
 
 always_comb begin
     case(state)
-        Wait_itrpt : nxt_state = (MIE && MEIE && ex_interrupt)? Taken_itrpt : Wait_itrpt; // Global Enable && Local Enable &&　interupt from sensor
+        Wait_itrpt : nxt_state = (MIE && ((MEIE && ex_interrupt) || (MTIE && tm_interrupt)))? Taken_itrpt : Wait_itrpt; // Global Enable && Local Enable &&　interupt from sensor
         Taken_itrpt: nxt_state = (!nop)? ISR : Taken_itrpt;
         ISR: nxt_state = (mret)? Wait_itrpt : ISR;
     endcase
@@ -104,7 +104,7 @@ always_ff @(posedge rst or posedge clk) begin
         if(!PCstall_axi) begin
             if(state == Wait_itrpt) begin
                 // Write due to interupt taken
-                if(MIE && MEIE && ex_interrupt) begin
+                if(MIE && ((MEIE && ex_interrupt) || (MTIE && tm_interrupt))) begin
                     MPIE <= MIE;
                     MIE  <= 1'b0;
                     MPP  <= 2'b11;
