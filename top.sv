@@ -12,7 +12,7 @@
 `include "tag_array_wrapper.sv"
 `include "data_array_wrapper.sv"
 `include "AXI/AXI.sv"
-`include "S2F_cdc.sv"
+
 
 module top(
     input clk,
@@ -279,8 +279,7 @@ module top(
 
 	// Interuption
 	logic sctrl_interrupt;
-	logic t_interrupt_slow;
-	logic t_interrupt_fast;
+	logic timer_interrupt;
 
 	// Master 0 & 1
 	CPU_wrapper m_cpu_wrapper(
@@ -288,7 +287,7 @@ module top(
     	.ARESET(rst),
 
 		.ex_interrupt(sctrl_interrupt),
-		.tm_interrupt(t_interrupt_fast),
+		.tm_interrupt(timer_interrupt),
 
 		//READ ADDRESS0
 		.ARID_M0(ARID_M0),
@@ -758,7 +757,7 @@ module top(
 		.clk2(clk2),
 		.rst2(rst2),
 		
-		.WTO(t_interrupt_slow),
+		.WTO(timer_interrupt),
 		
 		.AWID_S(AWID_S4),
 		.AWADDR_S(AWADDR_S4),
@@ -828,15 +827,5 @@ module top(
 		.DRAM_D(DRAM_D),
 		.DRAM_Q(DRAM_Q),
 		.DRAM_valid(DRAM_valid)
-	);
-
-	S2F_cdc m_s2f(
-		.f_clk(clk),
-		.f_rst(rst),
-		.s_clk(clk2),
-		.s_rst(rst2),
-
-		.in(t_interrupt_slow),
-		.out(t_interrupt_fast)
 	);
 endmodule

@@ -15,17 +15,23 @@ module WDT(
 logic [31:0] cnt;
 
 always_ff@(posedge clk2) begin
-	if(rst2) cnt <= 32'b0;
+	if(rst2) begin
+    cnt <= 32'b0;
+    WTO <= 1'b0;
+  end
 
 	else begin
 		if(WDEN) begin
 			if(WDLIVE) cnt <= 32'b0;
 			else cnt <= (cnt == WTOCNT)? cnt : cnt + 32'b1;
+
+      WTO <= (cnt == WTOCNT);
 		end
-		else cnt <= 32'b0;
+		else begin
+      cnt <= 32'b0;
+      WTO <= 1'b0;
+    end
 	end
 end
-
-assign WTO = WDEN && (cnt == WTOCNT);
 
 endmodule

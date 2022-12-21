@@ -2,6 +2,8 @@
 `include "../include/Config.svh"
 
 `include "WDT.sv"
+`include "S2F_cdc.sv"
+`include "F2S_cdc.sv"
 
 module WDT_wrapper(
   input clk,
@@ -120,17 +122,45 @@ end
 assign BID_S = BID_S_reg;
 assign BRESP_S = `AXI_RESP_OKAY;
 
+logic WTO_slow;
+logic WDEN_slow;
+logic WDLIVE_slow;
+logic [31:0] WTOCNT_slow;
+
 WDT WDT_m(
   .clk(clk),
   .rst(rst),
   .clk2(clk2),
   .rst2(rst2),
 
-  .WDEN(WDEN),
-  .WDLIVE(WDLIVE),
-  .WTOCNT(WTOCNT),
+  .WDEN(WDEN_slow),
+  .WDLIVE(WDLIVE_slow),
+  .WTOCNT(WTOCNT_slow),
 
-  .WTO(WTO)
+  .WTO(WTO_slow)
 
 );
+
+S2F_cdc m_s2f(
+    .f_clk(clk),
+    .f_rst(rst),
+
+    .WTO_in(WTO_slow),
+    .WTO_out(WTO)
+);
+
+F2S_cdc m_f2s(
+    .s_clk(clk2),
+    .s_rst(rst2),
+
+    .WTOCNT_in(WTOCNT),
+    .WTOCNT_out(WTOCNT_slow),
+
+    .WDEN_in(WDEN),
+    .WDEN_out(WDEN_slow),
+
+    .WDLIVE_in(WDLIVE),
+    .WDLIVE_out(WDLIVE_slow)
+);
+
 endmodule
