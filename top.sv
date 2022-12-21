@@ -285,7 +285,7 @@ module top(
 	// Master 0 & 1
 	CPU_wrapper m_cpu_wrapper(
     	.ACLK(clk),
-    	.ARESETn(~rst),
+    	.ARESET(rst),
 
 		.ex_interrupt(sctrl_interrupt),
 		.tm_interrupt(t_interrupt_fast),
@@ -350,7 +350,7 @@ module top(
 	// Bridge
 	AXI m_axi(
 		.ACLK(clk),
-		.ARESETn(~rst),
+		.ARESET(rst),
 
 		//WRITE ADDRESS
 		.AWID_M1(AWID_M1),
@@ -607,7 +607,7 @@ module top(
 	// slave 0
 	ROM_wrapper m_rom_wrapper(
 		.ACLK(clk),
-		.ARESETn(~rst),
+		.ARESET(rst),
 
 		// toward AXI
 		.ARID_S(ARID_S0),
@@ -635,7 +635,7 @@ module top(
 	// slave 1
 	SRAM_wrapper IM1(
 		.ACLK(clk),
-		.ARESETn(~rst),
+		.ARESET(rst),
 		.AWID_S(AWID_S1),
 		.AWADDR_S(AWADDR_S1),
 		.AWLEN_S(AWLEN_S1),
@@ -670,7 +670,7 @@ module top(
 	// slave 2
 	SRAM_wrapper DM1(
 		.ACLK(clk),
-		.ARESETn(~rst),
+		.ARESET(rst),
 		.AWID_S(AWID_S2),
 		.AWADDR_S(AWADDR_S2),
 		.AWLEN_S(AWLEN_S2),
@@ -783,7 +783,7 @@ module top(
 	// slave 5
 	DRAM_wrapper DRAM_W1(
 		.ACLK(clk),
-		.ARESETn(~rst),
+		.ARESET(rst),
 
 		.AWID_S(AWID_S5),
 		.AWADDR_S(AWADDR_S5),
@@ -829,8 +829,6 @@ module top(
 		.DRAM_Q(DRAM_Q),
 		.DRAM_valid(DRAM_valid)
 	);
-
-	
 
 	S2F_cdc m_s2f(
 		.f_clk(clk),

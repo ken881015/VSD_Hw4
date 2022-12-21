@@ -2,7 +2,7 @@
 
 module DRAM_wrapper(
     input ACLK,
-    input ARESETn,
+    input ARESET,
 
     input [`AXI_IDS_BITS-1:0] 	AWID_S,
     input [`AXI_ADDR_BITS-1:0]  AWADDR_S,
@@ -50,7 +50,6 @@ module DRAM_wrapper(
 );
 
     // inverse reset signal for active high design habit.
-    logic ARESET;
     logic [2:0] DelayCnt;
     logic [3:0] BurstCnt;
     logic[31:0] DRAM_A_reg;
@@ -64,7 +63,6 @@ module DRAM_wrapper(
 
     logic[31:0] WDATA_S_msk;
 
-    assign ARESET = ~ARESETn;
 
     enum logic [2:0] {
         IDLE,   
@@ -75,7 +73,7 @@ module DRAM_wrapper(
         PRECHARGE
     } state, nxt_state;
 
-    always_ff @( posedge ACLK or posedge ARESET) begin
+    always_ff  @( posedge ACLK) begin
         if(ARESET)state <= IDLE;
         else state <= nxt_state;
     end
@@ -132,7 +130,7 @@ module DRAM_wrapper(
     end
 
     // counter for DRAM delay 
-    always_ff  @( posedge ACLK or posedge ARESET) begin
+    always_ff  @( posedge ACLK) begin
         if(ARESET)begin 
             DelayCnt <= 3'd0;
         end
@@ -158,7 +156,7 @@ module DRAM_wrapper(
     end
 
     // counter for AXI Burst
-    always_ff  @( posedge ACLK or posedge ARESET) begin
+    always_ff  @( posedge ACLK) begin
         if(ARESET)begin 
             BurstCnt <= 4'd0;
         end
@@ -174,7 +172,7 @@ module DRAM_wrapper(
                                     {8{WSTRB_S[1]}},
                                     {8{WSTRB_S[0]}}};
 
-    always_ff @(posedge ARESET or posedge ACLK ) begin
+    always_ff  @( posedge ACLK) begin
         if(ARESET)begin
             DRAM_A_reg <= 32'b0;
             offset_reg <= 2'b0;

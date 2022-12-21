@@ -86,7 +86,7 @@ module L1C_inst(
     assign offset = core_addr [3:2];
     assign TA_match = (TA_in == TA_out);
 
-    always_ff @( posedge clk or posedge rst) begin
+    always_ff @( posedge clk) begin
         if(rst)state <= 2'b0;
         else state <= nxt_state;
     end
@@ -110,7 +110,7 @@ module L1C_inst(
 
     // T: total, M: miss, H: hit
     logic [31:0] RTCnt,RMCnt;
-    always_ff @( posedge clk or posedge rst) begin
+    always_ff @( posedge clk) begin
         if(rst)begin
             RTCnt <= 32'b0;
             RMCnt <= 32'b0;
@@ -152,7 +152,7 @@ module L1C_inst(
     assign I_req = (state == ReadMiss)? 1'b1 : 1'b0;
     assign I_addr = (state == ReadMiss)? core_addr : 32'b0;
 
-    always_ff @( posedge clk or posedge rst) begin
+    always_ff @( posedge clk) begin
         if(rst) begin
             counter <= 2'b0;
 

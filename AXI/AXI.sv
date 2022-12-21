@@ -9,7 +9,7 @@
 module AXI(
 
   input ACLK,
-  input ARESETn,
+  input ARESET,
   //MASTER INTERFACE
   // M0
   // READ
@@ -253,9 +253,6 @@ module AXI(
 	localparam Read_M1  = 2'b10;
 	localparam Write_M1 = 2'b11;
 
-	logic ARESET;
-	assign ARESET = ~ARESETn;
-
 	// Round robbing counter
 	// You can adjust frequency of alternative turn.
 	`define CNT_LENGTH 3
@@ -263,7 +260,7 @@ module AXI(
 	logic chance;
 
 	// cnt: Counter
-	always_ff @(posedge ARESET or posedge ACLK) begin
+	always_ff@(posedge ACLK) begin
 		if(ARESET)begin
 			cnt <= `CNT_LENGTH'b0;
 		end
@@ -273,7 +270,7 @@ module AXI(
 		end
 	end
 
-	always_ff@(posedge ACLK or posedge ARESET) begin
+	always_ff@(posedge ACLK) begin
 		if(ARESET)begin
 			chance <= 1'b0;
 		end
@@ -320,7 +317,7 @@ module AXI(
 	// 2. Master 1 has both function but won't do both simultaneously
 	
 	//================================== READ FSM ==================================
-	always_ff@(posedge ACLK or posedge ARESET) begin
+	always_ff@(posedge ACLK) begin
 		if(ARESET) state_R <= IDLE;
 		else state_R <= nxt_state_R;
 	end
@@ -355,7 +352,7 @@ module AXI(
 	// Address Register for Identifing Slave
 	logic [31:0] ARADDR_reg;
 
-	always_ff@(posedge ACLK or posedge ARESET) begin
+	always_ff@(posedge ACLK) begin
 		if(ARESET) begin
 			ARADDR_reg <= 32'b0;
 		end
@@ -658,7 +655,7 @@ module AXI(
 	end
 
 	//================================== WRITE FSM ==================================
-	always_ff@(posedge ACLK or posedge ARESET) begin
+	always_ff@(posedge ACLK) begin
 		if(ARESET) state_W <= IDLE;
 		else state_W <= nxt_state_W;
 	end
@@ -683,7 +680,7 @@ module AXI(
 	// Address Register for Identifing Slave
 	logic [31:0] AWADDR_reg;
 
-	always_ff@(posedge ACLK or posedge ARESET) begin
+	always_ff@(posedge ACLK) begin
 		if(ARESET) begin
 			AWADDR_reg <= 32'b0;
 		end

@@ -6,7 +6,7 @@
 
 module CPU_wrapper (
     input ACLK,
-	input ARESETn,
+	input ARESET,
 
     input ex_interrupt,
     input tm_interrupt,
@@ -67,10 +67,6 @@ module CPU_wrapper (
 	output logic BREADY_M1
 );
 
-// inverse reset signal for active high design habit.
-logic ARESET;
-assign ARESET = !ARESETn;
-
 // wire for CPU output port
 logic [31:0] ADDR_cpu;
 logic [31:0] DATA_cpu;
@@ -127,7 +123,7 @@ localparam Set_HS2    = 3'b110; // set one of signal (ready or valid) that can s
 // Read Behavior of Master 0 ================================
 
 // stage register descirption
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET) state_R_M0 <= 3'b0;
     else state_R_M0 <= nxt_state_R_M0;
 end
@@ -173,7 +169,7 @@ assign PCstall_axi = core_wait_ic ;
 
 // to avoid second times hand-shaking in one turn
 
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)DMOn_enable <= 1'b0;
 	else
 	begin
@@ -187,7 +183,7 @@ always_ff @(posedge ARESET or posedge ACLK ) begin
 end
 
 // stage register descirption
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)state_R_M1 <= 3'b00;
     else state_R_M1 <= nxt_state_R_M1;
 end
@@ -227,7 +223,7 @@ logic [31:0] ARADDR_M1_reg;
 logic [31:0] RDATA_M0_reg;
 logic [31:0] RDATA_M1_reg;
 
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         ARADDR_M1_reg <= 32'b0;
         RDATA_M0_reg <= 32'b0;
@@ -253,7 +249,7 @@ assign ARBURST_M1 = `AXI_BURST_INC;
 // Write Behavior of Master 1 =================================
 
 // stage register descirption
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)state_W_M1 <= 3'b00;
     else state_W_M1 <= nxt_state_W_M1;
 end
@@ -284,7 +280,7 @@ logic [31:0] WDATA_M1_reg;
 logic [3:0] WSTRB_M1_reg;
 // added because this assetion: If Data before control is not allowed write data handshake should follow control
 
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         AWADDR_M1_reg <= 32'b0;
         WDATA_M1_reg <= 32'b0;

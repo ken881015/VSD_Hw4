@@ -19,7 +19,7 @@ logic DH_flush_delay;
 logic PCSel_EX_delay;
 logic [31:0] inst_delay;
 
-always_ff @(posedge rst or posedge clk ) begin
+always_ff @(posedge clk ) begin
     if(rst)begin
         pc_out <= 32'b0;
         DH_flush_delay <= 1'b0;

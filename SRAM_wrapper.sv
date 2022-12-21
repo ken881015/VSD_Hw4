@@ -3,7 +3,7 @@
 
 module SRAM_wrapper (
   input ACLK,
-  input ARESETn,
+  input ARESET,
 
     //WRITE ADDRESS
 	input [`AXI_IDS_BITS-1:0]  AWID_S,
@@ -43,10 +43,6 @@ module SRAM_wrapper (
 	input RREADY_S
 );
 
-// inverse reset signal for active high design habit.
-logic ARESET;
-assign ARESET = ~ARESETn;
-
 // FSM parameters for 3 types (IM read, DM read, DM write)
 logic [2:0] state_R_S, nxt_state_R_S;
 logic [2:0] state_W_S, nxt_state_W_S;
@@ -80,7 +76,7 @@ logic [31:0] DI, DI_reg;
 logic [31:0] DO;
 logic [3:0] WEB;
 
-always_ff@(posedge ACLK or posedge ARESET) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         A_reg <= 14'b0;
         DI_reg <= 32'b0;
@@ -144,7 +140,7 @@ end
 // Read Behavior of Slave ================================
 
 // stage register description
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET) state_R_S <= 3'b0;
     else state_R_S <= nxt_state_R_S;
 end
@@ -178,7 +174,7 @@ assign RID_S = RID_S_reg;
 assign RRESP_S = `AXI_RESP_OKAY;
 assign RDATA_S = RDATA_S_reg;
 
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         ARLEN_S_reg <= 4'b0;
         RID_S_reg <= 8'b0;
@@ -217,7 +213,7 @@ always_comb begin
 end
 
 assign RLAST_S = (RVALID_S) && (BurstCnt == ARLEN_S_reg);
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         BurstCnt <= 4'b0;
     end
@@ -236,7 +232,7 @@ end
 // Write Behavior of Slave ===============================
 
 // stage register description
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET) state_W_S <= 3'b0;
     else state_W_S <= nxt_state_W_S;
 end
@@ -265,7 +261,7 @@ assign WREADY_S  = (state_W_S == Set_HSM);
 assign BVALID_S  = (state_W_S == Set_HS2);
 
 logic[7:0] BID_S_reg;
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         BID_S_reg <= 8'b0;
     end

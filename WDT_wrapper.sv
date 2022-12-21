@@ -54,7 +54,7 @@ localparam HSM        = 3'b100;
 localparam Store_Data = 3'b101;
 localparam Set_HS2    = 3'b110; // set one of signal (ready or valid) that can self control to high
 
-always_ff@(posedge clk or posedge rst) begin
+always_ff @(posedge clk) begin
     if(rst)begin
 		A_reg <= 12'b0;
 		WDEN <= 1'b0;
@@ -77,7 +77,7 @@ end
 // Write Behavior of Slave ===============================
 
 // stage register description
-always_ff @(posedge rst or posedge clk ) begin
+always_ff @(posedge clk) begin
     if(rst) state_W_S <= 3'b0;
     else state_W_S <= nxt_state_W_S;
 end
@@ -106,7 +106,7 @@ assign WREADY_S  = (state_W_S == Set_HSM);
 assign BVALID_S  = (state_W_S == Set_HS2);
 
 logic[7:0] BID_S_reg;
-always_ff @(posedge rst or posedge clk ) begin
+always_ff @(posedge clk) begin
     if(rst)begin
         BID_S_reg <= 8'b0;
     end

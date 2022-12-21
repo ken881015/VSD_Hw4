@@ -92,7 +92,7 @@ module L1C_data(
     assign cacheable = core_addr [31:10] != 22'h040000;
     
     //Read  
-    always_ff @( posedge clk or posedge rst) begin
+    always_ff @( posedge clk) begin
         if(rst)state <= 3'b0;
         else state <= nxt_state;
     end
@@ -128,7 +128,7 @@ module L1C_data(
 
     // T: total, M: miss, H: hit
     logic [31:0] RTCnt,RMCnt, WHCnt, WMCnt;
-    always_ff @( posedge clk or posedge rst) begin
+    always_ff @( posedge clk) begin
         if(rst)begin
             RTCnt <= 32'b0;
             RMCnt <= 32'b0;
@@ -185,7 +185,7 @@ module L1C_data(
     assign D_req = (state == ReadMiss || state == WriteMiss || state == WriteHit)? 1'b1 : 1'b0;
 	assign D_addr = (state == ReadMiss || state == WriteMiss || state == WriteHit)? core_addr : 32'b0;
     
-    always_ff @( posedge clk or posedge rst) begin
+    always_ff @( posedge clk) begin
         if(rst) begin
             counter <= 2'b0;
             valid <= 64'b0;

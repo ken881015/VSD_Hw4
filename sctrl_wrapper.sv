@@ -76,7 +76,7 @@ localparam HSM        = 3'b100;
 localparam Store_Data = 3'b101;
 localparam Set_HS2    = 3'b110; // set one of signal (ready or valid) that can self control to high
 
-always_ff@(posedge ACLK or posedge ARESET) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         sctrl_addr <= 12'b0;
         sctrl_en <= 1'b0;
@@ -100,7 +100,7 @@ end
 // Read Behavior of Slave ================================
 
 // stage register description
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET) state_R_S <= 3'b0;
     else state_R_S <= nxt_state_R_S;
 end
@@ -135,7 +135,7 @@ assign RID_S = RID_S_reg;
 assign RRESP_S = `AXI_RESP_OKAY;
 assign RDATA_S = RDATA_S_reg;
 
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         ARLEN_S_reg <= 4'b0;
         RID_S_reg <= 8'b0;
@@ -158,7 +158,7 @@ assign RLAST_S = RVALID_S;
 // Write Behavior of Slave ===============================
 
 // stage register description
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET) state_W_S <= 3'b0;
     else state_W_S <= nxt_state_W_S;
 end
@@ -187,7 +187,7 @@ assign WREADY_S  = (state_W_S == Set_HSM);
 assign BVALID_S  = (state_W_S == Set_HS2);
 
 logic[7:0] BID_S_reg;
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         BID_S_reg <= 8'b0;
     end

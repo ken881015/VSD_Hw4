@@ -34,7 +34,7 @@ always_comb begin
 end
 */
 
-always_ff @(posedge rst or posedge clk) begin
+always_ff @(posedge clk) begin
     if(rst) begin
         foreach(regs[i]) begin
             regs[i] <= 32'b0;

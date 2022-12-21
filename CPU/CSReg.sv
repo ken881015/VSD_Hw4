@@ -64,7 +64,7 @@ enum logic[2:0]{
 } state,nxt_state;
 
 
-always_ff @(posedge rst or posedge clk) begin
+always_ff @(posedge clk) begin
     if(rst) begin
         state <= Wait_itrpt;
     end
@@ -82,7 +82,7 @@ always_comb begin
     endcase
 end
 
-always_ff @(posedge rst or posedge clk) begin
+always_ff @(posedge clk) begin
     if(rst) begin
         MPP  <= 2'b0;
         MPIE <= 1'b0;

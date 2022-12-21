@@ -1,7 +1,7 @@
 
 module ROM_wrapper(
   input ACLK,
-  input ARESETn,
+  input ARESET,
 
   //READ ADDRESS
   input [`AXI_IDS_BITS-1:0]  		ARID_S,
@@ -27,10 +27,6 @@ module ROM_wrapper(
   output logic [11:0] ROM_address
 );
 
-// inverse reset signal for active high design habit.
-logic ARESET;
-assign ARESET = ~ARESETn;
-
 // wires for ROM input and output port
 assign ROM_read = 1'b1;
 assign ROM_enable = 1'b1;
@@ -52,7 +48,7 @@ logic [3:0] BurstCnt;
 logic [11:0] ROM_addr_reg; // ROM_addr_reg, but i_sram needs it to be named "A"
 
 
-always_ff@(posedge ACLK or posedge ARESET) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         ROM_addr_reg <= 12'b0;
     end
@@ -61,7 +57,7 @@ always_ff@(posedge ACLK or posedge ARESET) begin
     end
 end
 
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET) state_R_S <= 3'b0;
     else state_R_S <= nxt_state_R_S;
 end
@@ -94,7 +90,7 @@ assign RID_S = RID_S_reg;
 assign RRESP_S = `AXI_RESP_OKAY;
 assign RDATA_S = RDATA_S_reg;
 
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         ARLEN_S_reg <= 4'b0;
         RID_S_reg <= 8'b0;
@@ -127,7 +123,7 @@ end
 assign ROM_address = (ARLEN_S_reg == 4'b0011)? {ROM_addr_reg[11:2], BurstCnt[1:0]} : ROM_addr_reg;
 
 assign RLAST_S = (RVALID_S) && (BurstCnt == ARLEN_S_reg);
-always_ff @(posedge ARESET or posedge ACLK ) begin
+always_ff @(posedge ACLK ) begin
     if(ARESET)begin
         BurstCnt <= 4'b0;
     end

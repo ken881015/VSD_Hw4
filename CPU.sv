@@ -122,7 +122,7 @@ logic DH_flush;
 
 // added for Inst SRAM inst signal stablelization
 logic init;
-always_ff @(posedge rst or posedge clk) begin
+always_ff @(posedge clk) begin
     init <= (rst)? 1'b1 : 1'b0;
 end
 

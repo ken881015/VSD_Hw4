@@ -17,7 +17,7 @@ module Bar_EXME(
     input PCstall_axi
 );
 
-always_ff@(posedge rst or posedge clk) begin
+always_ff@(posedge clk) begin
     if(rst)begin
         pc_out <= 32'b0;
         rda_out <= 5'b0;
