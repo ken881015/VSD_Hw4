@@ -113,7 +113,7 @@ always_ff @(posedge rst or posedge clk) begin
             else if (state == Taken_itrpt) begin
                 // Only Record the effective inst then jump to mtvec. 
                 if(!nop) begin
-                    mepc <= pc+32'd4;
+                    mepc <= (wfi)? pc+32'd4 : pc;
                 end
             end
             else if (state == ISR && mret) begin

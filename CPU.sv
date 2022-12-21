@@ -71,7 +71,7 @@ logic DMOn;
 logic CSRWEn;
 logic retire;
 logic [31:0] CSR_rdata;
-logic [31:0] PC_isr;
+logic PC_isr;
 logic [31:0] pc_idex_out;
 logic [4:0] r1a_idex_out;
 logic [4:0] r2a_idex_out;
