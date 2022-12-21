@@ -261,22 +261,6 @@ module top(
 	logic                      RVALID_S3;
 	logic                      RREADY_S3;
 
-	//READ ADDRESS4
-	logic [`AXI_IDS_BITS-1:0]  ARID_S4;
-	logic [`AXI_ADDR_BITS-1:0] ARADDR_S4;
-	logic [`AXI_LEN_BITS-1:0]  ARLEN_S4;
-	logic [`AXI_SIZE_BITS-1:0] ARSIZE_S4;
-	logic [1:0]                ARBURST_S4;
-	logic                      ARVALID_S4;
-	logic                      ARREADY_S4;
-	//READ DATA3
-	logic [`AXI_IDS_BITS-1:0]  RID_S4;
-	logic [`AXI_DATA_BITS-1:0] RDATA_S4;
-	logic [1:0]                RRESP_S4;
-	logic                      RLAST_S4;
-	logic                      RVALID_S4;
-	logic                      RREADY_S4;
-
 	//READ ADDRESS5
 	logic [`AXI_IDS_BITS-1:0]  ARID_S5;
 	logic [`AXI_ADDR_BITS-1:0] ARADDR_S5;
@@ -601,23 +585,6 @@ module top(
 		.RLAST_S3(RLAST_S3),
 		.RVALID_S3(RVALID_S3),
 		.RREADY_S3(RREADY_S3),
-
-		//READ ADDRESS4
-		.ARID_S4(ARID_S4),
-		.ARADDR_S4(ARADDR_S4),
-		.ARLEN_S4(ARLEN_S4),
-		.ARSIZE_S4(ARSIZE_S4),
-		.ARBURST_S4(ARBURST_S4),
-		.ARVALID_S4(ARVALID_S4),
-		.ARREADY_S4(ARREADY_S4),
-
-		//READ DATA4
-		.RID_S4(RID_S4),
-		.RDATA_S4(RDATA_S4),
-		.RRESP_S4(RRESP_S4),
-		.RLAST_S4(RLAST_S4),
-		.RVALID_S4(RVALID_S4),
-		.RREADY_S4(RREADY_S4),
 
 		//READ ADDRESS5
 		.ARID_S5(ARID_S5),

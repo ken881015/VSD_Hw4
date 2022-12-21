@@ -28,17 +28,15 @@ module CSReg(
     input tm_interrupt
 );
 
-localparam MRET      = 12'h302;
-
-localparam Mstatus   = 12'h300; // 0
-localparam Mie       = 12'h304; // 1
-localparam Mtvec     = 12'h305; // 2 
-localparam Mepc      = 12'h341; // 3
-localparam Mip       = 12'h344; // 4
-localparam Mcycle    = 12'hB00; // 5
-localparam Minstret  = 12'hB02; // 6
-localparam Mcycleh   = 12'hB80; // 7
-localparam Minstreth = 12'hB82; // 8
+localparam A_Mstatus   = 12'h300; // 0
+localparam A_Mie       = 12'h304; // 1
+localparam A_Mtvec     = 12'h305; // 2 
+localparam A_Mepc      = 12'h341; // 3
+localparam A_Mip       = 12'h344; // 4
+localparam A_Mcycle    = 12'hB00; // 5
+localparam A_Minstret  = 12'hB02; // 6
+localparam A_Mcycleh   = 12'hB80; // 7
+localparam A_Minstreth = 12'hB82; // 8
 
 // Mstatus
 logic [1:0] MPP;
@@ -50,6 +48,8 @@ assign mtvec = 32'h0001_0000;
 
 // Mip
 logic MEIP, MTIP;
+assign MEIP = 1'b0;
+assign MTIP = 1'b0;
 
 // Mie
 logic MEIE, MTIE;
@@ -78,6 +78,7 @@ always_comb begin
         Wait_itrpt : nxt_state = (MIE && ((MEIE && ex_interrupt) || (MTIE && tm_interrupt)))? Taken_itrpt : Wait_itrpt; // Global Enable && Local Enable &&　interupt from sensor
         Taken_itrpt: nxt_state = (!nop)? ISR : Taken_itrpt;
         ISR: nxt_state = (mret)? Wait_itrpt : ISR;
+        default nxt_state = Wait_itrpt;
     endcase
 end
 
@@ -86,8 +87,6 @@ always_ff @(posedge rst or posedge clk) begin
         MPP  <= 2'b0;
         MPIE <= 1'b0;
         MIE  <= 1'b0;
-        MEIP <= 1'b0;
-        MTIP <= 1'b0;
         MEIE <= 1'b0;
         MTIE <= 1'b0;
         mepc <= 32'b0;
@@ -125,16 +124,16 @@ always_ff @(posedge rst or posedge clk) begin
             // Write by instruction
             if(wen)begin
                 case(addr)
-                    Mstatus  : begin
+                    A_Mstatus  : begin
                         MPP <= wdata[12:11];
                         MPIE <= wdata[7];
                         MIE <= wdata[3];
                     end
-                    Mie      : begin
+                    A_Mie      : begin
                         MEIE <= wdata[11];
                         MTIE <= wdata[7];
                     end  
-                    Mepc     : mepc <= wdata;
+                    A_Mepc     : mepc <= wdata;
                 endcase
             end
 
@@ -147,15 +146,15 @@ assign PC_isr = (state == Taken_itrpt) && (!nop);
 always_comb begin
     if(state == Wait_itrpt) begin
         case(addr)
-            Mstatus   : rdata = {19'b0,MPP,3'b0,MPIE,3'b0,MIE,3'b0};
-            Mie       : rdata = {20'b0,MEIE,3'b0,MTIE,7'b0};
-            Mtvec     : rdata = mtvec;
-            Mepc      : rdata = mepc;
-            Mip       : rdata = {20'b0,MEIP,3'b0,MTIP,7'b0};
-            // Mcycle    : rdata = CSRegs[5];
-            // Minstret  : rdata = CSRegs[6];
-            // Mcycleh   : rdata = CSRegs[7];
-            // Minstreth : rdata = CSRegs[8];
+            A_Mstatus   : rdata = {19'b0,MPP,3'b0,MPIE,3'b0,MIE,3'b0};
+            A_Mie       : rdata = {20'b0,MEIE,3'b0,MTIE,7'b0};
+            A_Mtvec     : rdata = mtvec;
+            A_Mepc      : rdata = mepc;
+            A_Mip       : rdata = {20'b0,MEIP,3'b0,MTIP,7'b0};
+            // A_Mcycle    : rdata = CSRegs[5];
+            // A_Minstret  : rdata = CSRegs[6];
+            // A_Mcycleh   : rdata = CSRegs[7];
+            // A_Minstreth : rdata = CSRegs[8];
             default   : rdata = 32'b0;
         endcase
     end
@@ -164,6 +163,9 @@ always_comb begin
     end
     else if (state == ISR) begin
         rdata = mepc;
+    end
+    else begin
+        rdata = 32'b0;
     end
 end
 

@@ -192,20 +192,6 @@ module AXI(
   input [1:0]                       BRESP_S4,
   input                             BVALID_S4,
   output logic                      BREADY_S4,
-  // READ
-  output logic [`AXI_IDS_BITS-1:0]  ARID_S4,
-  output logic [`AXI_ADDR_BITS-1:0] ARADDR_S4,
-  output logic [`AXI_LEN_BITS-1:0]  ARLEN_S4,
-  output logic [`AXI_SIZE_BITS-1:0] ARSIZE_S4,
-  output logic [1:0]                ARBURST_S4,
-  output logic                      ARVALID_S4,
-  input                             ARREADY_S4,
-  input [`AXI_IDS_BITS-1:0]         RID_S4,
-  input [`AXI_DATA_BITS-1:0]        RDATA_S4,
-  input [1:0]                       RRESP_S4,
-  input                             RLAST_S4,
-  input                             RVALID_S4,
-  output logic                      RREADY_S4,
 
   // S5
   // WRITE
@@ -416,16 +402,6 @@ module AXI(
 					RLAST_M0   = RLAST_S3;
 					RVALID_M0  = RVALID_S3;
 				end
-				// request to Slave 4
-				else if(ARADDR_reg[31:10] == 22'h040040)begin
-					ARREADY_M0 = ARREADY_S4;
-
-					RID_M0     = RID_S4[3:0];
-					RDATA_M0   = RDATA_S4;
-					RRESP_M0   = RRESP_S4;
-					RLAST_M0   = RLAST_S4;
-					RVALID_M0  = RVALID_S4;
-				end
 				// request to Slave 5
 				else if(ARADDR_reg[31:23] == 9'h040)begin
 					ARREADY_M0 = ARREADY_S5;
@@ -473,15 +449,6 @@ module AXI(
 				ARVALID_S3 = (ARADDR_reg[31:10] == 22'h040000)? ARVALID_M0 : 1'b0;
 
 				RREADY_S3  = (ARADDR_reg[31:10] == 22'h040000)? RREADY_M0 : 1'b0;
-
-				ARID_S4    = (ARADDR_reg[31:10] == 22'h040040)? {4'b0,ARID_M0} : 8'b0;
-				ARADDR_S4  = (ARADDR_reg[31:10] == 22'h040040)? ARADDR_M0 : 32'b0;
-				ARLEN_S4   = (ARADDR_reg[31:10] == 22'h040040)? ARLEN_M0 : 4'b0;
-				ARSIZE_S4  = (ARADDR_reg[31:10] == 22'h040040)? ARSIZE_M0 : 3'b0;
-				ARBURST_S4 = (ARADDR_reg[31:10] == 22'h040040)? ARBURST_M0 : 2'b0;
-				ARVALID_S4 = (ARADDR_reg[31:10] == 22'h040040)? ARVALID_M0 : 1'b0;
-
-				RREADY_S4  = (ARADDR_reg[31:10] == 22'h040040)? RREADY_M0 : 1'b0;
 
 				ARID_S5    = (ARADDR_reg[31:23] == 9'h040)? {4'b0,ARID_M0} : 8'b0;
 				ARADDR_S5  = (ARADDR_reg[31:23] == 9'h040)? ARADDR_M0 : 32'b0;
@@ -558,16 +525,7 @@ module AXI(
 					RLAST_M1   = RLAST_S3;
 					RVALID_M1  = RVALID_S3;
 				end
-				// Request to S4
-				else if(ARADDR_reg[31:10] == 22'h040040) begin
-					ARREADY_M1 = ARREADY_S4;
 
-					RID_M1     = RID_S4[3:0];
-					RDATA_M1   = RDATA_S4;
-					RRESP_M1   = RRESP_S4;
-					RLAST_M1   = RLAST_S4;
-					RVALID_M1  = RVALID_S4;
-				end
 				// Request to S5
 				else if(ARADDR_reg[31:23] == 9'h040) begin
 					ARREADY_M1 = ARREADY_S5;
@@ -623,15 +581,6 @@ module AXI(
 				ARVALID_S3 = (ARADDR_reg[31:10] == 22'h040000)? ARVALID_M1 : 1'b0;
 
 				RREADY_S3  = (ARADDR_reg[31:10] == 22'h040000)? RREADY_M1 : 1'b0;
-
-				ARID_S4    = (ARADDR_reg[31:10] == 22'h040040)? {4'b0,ARID_M1} : 8'b0;
-				ARADDR_S4  = (ARADDR_reg[31:10] == 22'h040040)? ARADDR_M1 : 32'b0;
-				ARLEN_S4   = (ARADDR_reg[31:10] == 22'h040040)? ARLEN_M1 : 4'b0;
-				ARSIZE_S4  = (ARADDR_reg[31:10] == 22'h040040)? ARSIZE_M1 : 3'b0;
-				ARBURST_S4 = (ARADDR_reg[31:10] == 22'h040040)? ARBURST_M1 : 2'b0;
-				ARVALID_S4 = (ARADDR_reg[31:10] == 22'h040040)? ARVALID_M1 : 1'b0;
-
-				RREADY_S4  = (ARADDR_reg[31:10] == 22'h040040)? RREADY_M1 : 1'b0;
 
 				ARID_S5    = (ARADDR_reg[31:23] == 9'h040)? {4'b0,ARID_M1} : 8'b0;
 				ARADDR_S5  = (ARADDR_reg[31:23] == 9'h040)? ARADDR_M1 : 32'b0;
@@ -695,15 +644,6 @@ module AXI(
 				ARVALID_S3 = 1'b0;
 
 				RREADY_S3 = 1'b0;
-
-				ARID_S4 = 8'b0;
-				ARADDR_S4 = 32'b0;
-				ARLEN_S4 = 4'b0;
-				ARSIZE_S4 = 3'b0;
-				ARBURST_S4 = 2'b0;
-				ARVALID_S4 = 1'b0;
-
-				RREADY_S4 = 1'b0;
 
 				ARID_S5 = 8'b0;
 				ARADDR_S5 = 32'b0;

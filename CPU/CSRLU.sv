@@ -9,7 +9,7 @@ module CSRLU(
 );
 
 always_comb begin
-    case(funct3[1:0])
+    case(funct3)
         `RW  : CSRLUOut = rs1;
         `RS  : CSRLUOut = csr | rs1;
         `RC  : CSRLUOut = csr & (~rs1);

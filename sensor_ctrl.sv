@@ -35,7 +35,7 @@ module sensor_ctrl(
     else if (sctrl_clear)
       counter <= 6'd0;
     else if (sctrl_en && (~full) && sensor_ready)
-      counter <= counter + 1'b1;
+      counter <= counter + 6'b1;
   end
 
   always_comb

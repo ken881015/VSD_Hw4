@@ -91,8 +91,8 @@ always_ff@(posedge ACLK or posedge ARESET) begin
         end
 
         if(WREADY_S && WVALID_S) begin
-            if(sctrl_addr == 12'h100) sctrl_en <= WDATA_S;
-            if(sctrl_addr == 12'h200) sctrl_clear <= WDATA_S;
+            if(sctrl_addr == 12'h100) sctrl_en <= WDATA_S[0];
+            if(sctrl_addr == 12'h200) sctrl_clear <= WDATA_S[0];
         end
     end
 end

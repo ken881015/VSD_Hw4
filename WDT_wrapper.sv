@@ -67,8 +67,8 @@ always_ff@(posedge clk or posedge rst) begin
         end
 
         if(WREADY_S && WVALID_S) begin
-            if(A_reg == 12'h100) WDEN   <= WDATA_S;
-            if(A_reg == 12'h200) WDLIVE <= WDATA_S;
+            if(A_reg == 12'h100) WDEN   <= WDATA_S[0];
+            if(A_reg == 12'h200) WDLIVE <= WDATA_S[0];
 			if(A_reg == 12'h300) WTOCNT <= WDATA_S;
         end
     end
