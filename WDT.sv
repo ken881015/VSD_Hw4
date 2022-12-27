@@ -23,7 +23,7 @@ always_ff@(posedge clk2) begin
 	else begin
 		if(WDEN) begin
 			if(WDLIVE) cnt <= 32'b0;
-			else cnt <= (cnt == WTOCNT)? cnt : cnt + 32'b1;
+			else cnt <= (cnt == WTOCNT)? 32'b0 : cnt + 32'b1;
 
       WTO <= (cnt == WTOCNT);
 		end

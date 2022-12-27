@@ -57,10 +57,11 @@ logic MEIE, MTIE;
 // Mepc
 logic [31:0] mepc;
 
-enum logic[2:0]{
-    Wait_itrpt  = 3'd0,
-    Taken_itrpt = 3'd1,
-    ISR         = 3'd2 // Interrupt Service Routine
+enum logic[1:0]{
+    Wait_itrpt  = 2'd0,
+    Taken_exipt = 2'd1,
+    Taken_tmipt = 2'd2,
+    ISR         = 2'd3 // Interrupt Service Routine
 } state,nxt_state;
 
 
@@ -75,10 +76,13 @@ end
 
 always_comb begin
     case(state)
-        Wait_itrpt : nxt_state = (MIE && ((MEIE && ex_interrupt) || (MTIE && tm_interrupt)))? Taken_itrpt : Wait_itrpt; // Global Enable && Local Enable &&　interupt from sensor
-        Taken_itrpt: nxt_state = (!nop)? ISR : Taken_itrpt;
+        Wait_itrpt : nxt_state = (MIE && MEIE && ex_interrupt)? Taken_exipt :
+                                 (MIE && MTIE && tm_interrupt)? Taken_tmipt : Wait_itrpt; // Global Enable && Local Enable &&　interupt from sensor
+        
+        Taken_exipt: nxt_state = (!nop)? ISR : Taken_exipt;
+        Taken_tmipt: nxt_state = (!nop)? Wait_itrpt : Taken_tmipt;
+
         ISR: nxt_state = (mret)? Wait_itrpt : ISR;
-        default nxt_state = Wait_itrpt;
     endcase
 end
 
@@ -109,7 +113,7 @@ always_ff @(posedge clk) begin
                     MPP  <= 2'b11;
                 end
             end
-            else if (state == Taken_itrpt) begin
+            else if (state == Taken_exipt || state == Taken_tmipt) begin
                 // Only Record the effective inst then jump to mtvec. 
                 if(!nop) begin
                     mepc <= (wfi)? pc+32'd4 : pc;
@@ -141,7 +145,7 @@ always_ff @(posedge clk) begin
     end
 end
 
-assign PC_isr = (state == Taken_itrpt) && (!nop);
+assign PC_isr = (state == Taken_exipt || state == Taken_tmipt) && (!nop);
 
 always_comb begin
     if(state == Wait_itrpt) begin
@@ -158,7 +162,10 @@ always_comb begin
             default   : rdata = 32'b0;
         endcase
     end
-    else if (state == Taken_itrpt) begin
+    else if (state == Taken_exipt) begin
+        rdata = mtvec;
+    end
+    else if (state == Taken_tmipt) begin
         rdata = mtvec;
     end
     else if (state == ISR) begin
