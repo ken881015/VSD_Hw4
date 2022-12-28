@@ -80,7 +80,7 @@ always_comb begin
                                  (MIE && MTIE && tm_interrupt)? Taken_tmipt : Wait_itrpt; // Global Enable && Local Enable &&　interupt from sensor
         
         Taken_exipt: nxt_state = (!nop)? ISR : Taken_exipt;
-        Taken_tmipt: nxt_state = (!nop)? Wait_itrpt : Taken_tmipt;
+        Taken_tmipt: nxt_state = (!nop)? ISR : Taken_tmipt;
 
         ISR: nxt_state = (mret)? Wait_itrpt : ISR;
     endcase
